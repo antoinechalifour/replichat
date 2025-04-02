@@ -1,9 +1,8 @@
 import {
+  createRootRouteWithContext,
   HeadContent,
-  Link,
   Outlet,
   Scripts,
-  createRootRouteWithContext,
 } from "@tanstack/react-router";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
@@ -13,27 +12,20 @@ import { DefaultCatchBoundary } from "~/components/DefaultCatchBoundary";
 import { NotFound } from "~/components/NotFound";
 import appCss from "~/styles/app.css?url";
 import { seo } from "~/utils/seo";
-import * as fs from "node:fs/promises";
+import { ClerkProvider, SignInButton } from "@clerk/tanstack-react-start";
 import { createServerFn } from "@tanstack/react-start";
+import { getWebRequest } from "@tanstack/react-start/server";
+import { ReplicacheProvider } from "~/components/Replicache";
+import { authenticateOrNull } from "~/server/auth";
+import { PropsWithChildren } from "react";
 
-async function readUser() {
-  const auth = await fs.readFile("auth.json", "utf-8");
-  return JSON.parse(auth) as {
-    id: string;
-    name: string;
-  };
-}
-
-const getAuth = createServerFn().handler(() => readUser());
+const fetchAuth = createServerFn({ method: "GET" }).handler(() =>
+  authenticateOrNull(getWebRequest()!),
+);
 
 export const Route = createRootRouteWithContext<{
   queryClient: QueryClient;
 }>()({
-  beforeLoad: async () => {
-    return {
-      user: await getAuth(),
-    };
-  },
   head: () => ({
     meta: [
       {
@@ -72,6 +64,7 @@ export const Route = createRootRouteWithContext<{
       { rel: "icon", href: "/favicon.ico" },
     ],
   }),
+  ssr: false,
   errorComponent: (props) => {
     return (
       <RootDocument>
@@ -79,30 +72,62 @@ export const Route = createRootRouteWithContext<{
       </RootDocument>
     );
   },
+  loader: () => {
+    return fetchAuth();
+  },
   notFoundComponent: () => <NotFound />,
   component: RootComponent,
 });
 
+function LoginPage() {
+  return (
+    <main className="h-screen flex items-center justify-center">
+      <SignInButton />
+    </main>
+  );
+}
+
+function ClientOnly({ children }: PropsWithChildren) {
+  const [mounted, setMounted] = React.useState(false);
+  React.useEffect(() => {
+    setMounted(true);
+  }, []);
+  return mounted ? <>{children}</> : null;
+}
+
 function RootComponent() {
+  const user = Route.useLoaderData();
   return (
     <RootDocument>
-      <Outlet />
+      {user == null ? (
+        <div>
+          <LoginPage />
+        </div>
+      ) : (
+        <ClientOnly>
+          <ReplicacheProvider userId={user.id}>
+            <Outlet />
+          </ReplicacheProvider>
+        </ClientOnly>
+      )}
     </RootDocument>
   );
 }
 
 function RootDocument({ children }: { children: React.ReactNode }) {
   return (
-    <html>
-      <head>
-        <HeadContent />
-      </head>
-      <body>
-        {children}
-        <TanStackRouterDevtools position="bottom-right" />
-        <ReactQueryDevtools buttonPosition="bottom-left" />
-        <Scripts />
-      </body>
-    </html>
+    <ClerkProvider>
+      <html>
+        <head>
+          <HeadContent />
+        </head>
+        <body>
+          {children}
+          <TanStackRouterDevtools position="bottom-right" />
+          <ReactQueryDevtools buttonPosition="bottom-left" />
+          <Scripts />
+        </body>
+      </html>
+    </ClerkProvider>
   );
 }

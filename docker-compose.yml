@@ -1,0 +1,20 @@
+# Use postgres/example user/password credentials
+version: "3.1"
+
+services:
+  database:
+    image: postgres
+    restart: always
+    ports:
+      - "8989:5432"
+    environment:
+      PGDATA: ./data
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: gpt-clone
+
+  redis:
+    image: redis:6.2.6
+    restart: always
+    ports:
+      - "8999:6379"

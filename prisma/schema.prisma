@@ -1,0 +1,68 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                     String                  @id @default(cuid())
+  externalId             String                  @unique
+  createdAt              DateTime                @default(now())
+  updatedAt              DateTime                @updatedAt
+  replicacheClientGroups ReplicacheClientGroup[]
+  chats                  Chat[]
+}
+
+model ReplicacheClientGroup {
+  id         String             @id @default(cuid())
+  userId     String
+  cvrVersion Int
+  createdAt  DateTime           @default(now())
+  updatedAt  DateTime           @updatedAt
+  user       User               @relation(fields: [userId], references: [id])
+  clients    ReplicacheClient[]
+}
+
+model ReplicacheClient {
+  id             String                @id @default(cuid())
+  clientGroupId  String
+  lastMutationId Int
+  createdAt      DateTime              @default(now())
+  updatedAt      DateTime              @updatedAt
+  clientGroup    ReplicacheClientGroup @relation(fields: [clientGroupId], references: [id])
+}
+
+model Chat {
+  id        String    @id @default(cuid())
+  userId    String
+  version   Int
+  title     String    @default("Untitled")
+  user      User      @relation(fields: [userId], references: [id])
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  messages  Message[]
+}
+
+enum MessageRole {
+  USER
+  SYSTEM
+}
+
+model Message {
+  id        String      @id @default(cuid())
+  chatId    String
+  content   String
+  role      MessageRole
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+  chat      Chat        @relation(fields: [chatId], references: [id], onDelete: Cascade)
+}
