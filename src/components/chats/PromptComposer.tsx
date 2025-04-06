@@ -1,11 +1,14 @@
 import { useForm } from "@tanstack/react-form";
 import { Icon } from "~/components/Icon";
 import { ArrowRightIcon } from "lucide-react";
+import clsx from "clsx";
 
 export function PromptComposer({
   autofocus = false,
+  disabled,
   onSubmit,
 }: {
+  disabled?: boolean;
   autofocus?: boolean;
   onSubmit: (message: string) => Promise<void>;
 }) {
@@ -35,8 +38,12 @@ export function PromptComposer({
         <form.Field name="message">
           {(field) => (
             <textarea
+              disabled={disabled}
               autoFocus={autofocus}
-              className="px-3.5 py-0.5 grow resize-none focus:outline-0 field-sizing-content max-h-52 overflow-y-auto"
+              className={clsx(
+                "px-3.5 py-0.5 grow resize-none focus:outline-0 field-sizing-content max-h-52 overflow-y-auto",
+                "disabled:bg-transparent",
+              )}
               rows={2}
               placeholder="Ask anything"
               aria-label="Ask anything"

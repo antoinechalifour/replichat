@@ -38,7 +38,7 @@ function RouteComponent() {
           </div>
         </div>
       </div>
-      <ChatPromptComposer chatId={params.chatId} />
+      <ChatPromptComposer chatId={params.chatId} disabled={shouldStream} />
     </>
   );
 }
