@@ -12,8 +12,8 @@ import {
 } from "./CVRs";
 import { CVREntities } from "./CVREntities";
 import { VersionSearchResult } from "~/server/sync/Version";
-import { promiseAllObject } from "~/utils/promises";
 import { Clients } from "~/server/sync/Clients";
+import { typedFromEntries, typedKeys } from "~/utils/object";
 
 export const pullRequestSchema = z.object({
   clientGroupID: z.string(),
@@ -49,28 +49,22 @@ export class PullHandler {
         pull.clientGroupID,
         userId,
       );
-      const cvrEntities = await this.cvrEntities.getCVREntities(userId);
+      const cvrEntitiesVersion =
+        await this.cvrEntities.getEntitiesVersion(userId);
       const clientsVersions = await this.clients.getVersionsInClientGroup(
         pull.clientGroupID,
       );
       const nextCVR: ReplicacheCVR = {
-        ...Object.fromEntries(
-          cvrEntities.map((entity) => [entity.type, entity.entities]),
-        ),
+        ...cvrEntitiesVersion,
         clients: cvrEntriesFromSearch(clientsVersions),
       };
       const diff = diffCVR(baseCVR, nextCVR);
       if (prevCVR && isCVRDiffEmpty(diff)) return null;
 
-      // TODO
-      const entityTypes = Object.keys(diff).filter((key) => key !== "clients");
-      const entities_new = await promiseAllObject(
-        Object.fromEntries(
-          entityTypes.map((type) => [
-            type,
-            this.cvrEntities.getEntities(userId, type, diff[type].puts),
-          ]),
-        ),
+      const entityTypes = typedKeys(cvrEntitiesVersion);
+      const entitiesDetails = await this.cvrEntities.getEntitiesDetails(
+        userId,
+        typedFromEntries(entityTypes.map((type) => [type, diff[type].puts])),
       );
 
       const clients: ReplicacheCVREntries = {};
@@ -88,12 +82,12 @@ export class PullHandler {
       });
 
       return {
-        entities: Object.fromEntries(
+        entities: typedFromEntries(
           entityTypes.map((type) => [
             type,
             {
               dels: diff[type].dels ?? [],
-              puts: entities_new[type] ?? [],
+              puts: entitiesDetails[type] ?? [],
             },
           ]),
         ),
@@ -101,8 +95,7 @@ export class PullHandler {
         nextCVR,
         nextCVRVersion,
       };
-    }); // 15. Commit
-    // console.log("15 > Transaction commited");
+    });
 
     if (result === null) {
       return {
@@ -116,6 +109,7 @@ export class PullHandler {
 
     // 16. let nextCVRID = randomID()
     const cvrID = crypto.randomUUID();
+    console.log(nextCVR);
 
     // 17. putCVR(nextCVR)
     await this.cvrs.save(cvrID, nextCVR);
@@ -146,19 +140,12 @@ export class PullHandler {
       }
     }
 
-    const cookie: Cookie = {
-      order: nextCVRVersion,
-      cvrID,
-    };
-
-    const lastMutationIDChanges = clients;
-
-    // console.log("------------------------------------------------------");
-    console.log("Patch", patch);
-
     return {
-      cookie,
-      lastMutationIDChanges,
+      cookie: {
+        order: nextCVRVersion,
+        cvrID,
+      } satisfies Cookie,
+      lastMutationIDChanges: clients,
       patch,
     };
   }

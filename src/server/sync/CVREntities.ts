@@ -1,50 +1,29 @@
 import { tx } from "~/server/prisma";
 import { ChatViewModel } from "~/shared/ChatViewModel";
+import { promiseAllObject } from "~/utils/promises";
 
-export type CVREntity = {
-  type: string;
-  entities: Record<string, number>;
+export type CVREntitiesVersions = {
+  chats: Record<string, number>;
+};
+
+type FetchPatchedEntitiesParams = {
+  chats: string[];
+};
+
+type CVREntitiesDetails = {
+  chats: ChatViewModel[];
 };
 
 export interface CVREntities {
-  getCVREntities(userId: string): Promise<CVREntity[]>;
-  getEntities(
+  getEntitiesVersion(userId: string): Promise<CVREntitiesVersions>;
+  getEntitiesDetails(
     userId: string,
-    type: string,
-    ids: string[],
-  ): Promise<{ id: string }[]>;
+    params: FetchPatchedEntitiesParams,
+  ): Promise<CVREntitiesDetails>;
 }
-
-/*
-async function getChats(ids: string[]) {
-  const results = await tx().chat.findMany({
-    where: { id: { in: ids } },
-    orderBy: { createdAt: "desc" },
-    include: {
-      messages: { orderBy: { createdAt: "asc" } },
-    },
-  });
-
-  return results.map(
-    (result): ChatViewModel => ({
-      id: result.id,
-      title: result.title,
-      messages: result.messages.map((message) => ({
-        id: message.id,
-        content: message.content,
-        role: message.role,
-        createdAt: message.createdAt.toISOString(),
-        synced: true,
-      })),
-      createdAt: result.createdAt.toISOString(),
-    }),
-  );
-}
-
- */
 
 export class CVREntitiesAdapter implements CVREntities {
-  async getCVREntities(userId: string): Promise<CVREntity[]> {
+  async getEntitiesVersion(userId: string): Promise<CVREntitiesVersions> {
     const [chats] = await Promise.all([
       tx().chat.findMany({
         where: { userId },
@@ -52,45 +31,43 @@ export class CVREntitiesAdapter implements CVREntities {
       }),
     ]);
 
-    return [
-      {
-        type: "chats",
-        entities: this.cvrEntities(chats),
-      },
-    ];
+    return {
+      chats: this.cvrEntities(chats),
+    };
   }
 
-  async getEntities(
+  getEntitiesDetails(
     userId: string,
-    type: string,
-    ids: string[],
-  ): Promise<{ id: string }[]> {
-    if (type === "chats") {
-      const results = await tx().chat.findMany({
-        where: { id: { in: ids }, userId },
-        orderBy: { createdAt: "desc" },
-        include: {
-          messages: { orderBy: { createdAt: "asc" } },
-        },
-      });
+    { chats }: FetchPatchedEntitiesParams,
+  ): Promise<CVREntitiesDetails> {
+    return promiseAllObject({
+      chats: this.fetchChats(userId, chats),
+    });
+  }
 
-      return results.map(
-        (result): ChatViewModel => ({
-          id: result.id,
-          title: result.title,
-          messages: result.messages.map((message) => ({
-            id: message.id,
-            content: message.content,
-            role: message.role,
-            createdAt: message.createdAt.toISOString(),
-            synced: true,
-          })),
-          createdAt: result.createdAt.toISOString(),
-        }),
-      );
-    }
+  private async fetchChats(userId: string, ids: string[]) {
+    const results = await tx().chat.findMany({
+      where: { id: { in: ids }, userId },
+      orderBy: { createdAt: "desc" },
+      include: {
+        messages: { orderBy: { createdAt: "asc" } },
+      },
+    });
 
-    throw new Error(`Unknown CVR entity type: ${type}`);
+    return results.map(
+      (result): ChatViewModel => ({
+        id: result.id,
+        title: result.title,
+        messages: result.messages.map((message) => ({
+          id: message.id,
+          content: message.content,
+          role: message.role,
+          createdAt: message.createdAt.toISOString(),
+          synced: true,
+        })),
+        createdAt: result.createdAt.toISOString(),
+      }),
+    );
   }
 
   private cvrEntities(entities: Array<{ id: string; updatedAt: Date }>) {
