@@ -101,6 +101,7 @@ export class CVREntitiesAdapter implements CVREntities {
     return results.map(
       (result): UserViewModel => ({
         id: result.id,
+        currentModelId: result.currentModelId,
         hasOpenAiApiKey: result.openAiApiKey != null,
       }),
     );

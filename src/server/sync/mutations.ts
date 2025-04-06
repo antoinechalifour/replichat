@@ -4,10 +4,11 @@ import {
   sendMessage,
   updateChat,
 } from "./mutations/chats";
-import { setApiKey } from "./mutations/users";
+import { setApiKey, setCurrentModel } from "./mutations/users";
 
 export const mutators = {
   [setApiKey.mutationName]: setApiKey,
+  [setCurrentModel.mutationName]: setCurrentModel,
   [createChat.mutationName]: createChat,
   [updateChat.mutationName]: updateChat,
   [deleteChat.mutationName]: deleteChat,

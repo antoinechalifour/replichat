@@ -47,7 +47,7 @@ function RouteComponent() {
       </nav>
       <div className="grow shrink-0 flex flex-col bg-white min-h-screen">
         <header className="p-3 flex items-center justify-between">
-          <ModelSelect />
+          <ModelSelect user={user} />
 
           <UserButton />
         </header>

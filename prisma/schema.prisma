@@ -16,11 +16,13 @@ datasource db {
 model User {
   id                     String                  @id @default(cuid())
   externalId             String                  @unique
+  currentModelId         String
   openAiApiKey           String?
   createdAt              DateTime                @default(now())
   updatedAt              DateTime                @updatedAt
   replicacheClientGroups ReplicacheClientGroup[]
   chats                  Chat[]
+  currentModel           Model                   @relation(fields: [currentModelId], references: [id])
 }
 
 model ReplicacheClientGroup {
@@ -75,4 +77,5 @@ model Model {
   code        String   @unique
   createdAt   DateTime @default(now())
   updatedAt   DateTime @default(now()) @updatedAt
+  users       User[]
 }

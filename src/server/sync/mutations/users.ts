@@ -10,3 +10,12 @@ export const setApiKey = createMutationHandler("setApiKey")
       data: { openAiApiKey: args.apiKey },
     });
   });
+
+export const setCurrentModel = createMutationHandler("setCurrentModel")
+  .validate((args) => z.object({ modelId: z.string().min(1) }).parse(args))
+  .handler(async ({ args, ctx }) => {
+    await tx().user.update({
+      where: { id: ctx.userId },
+      data: { currentModelId: args.modelId },
+    });
+  });
