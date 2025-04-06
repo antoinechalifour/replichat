@@ -112,6 +112,7 @@ export class CVREntitiesAdapter implements CVREntities {
       (result): ModelViewModel => ({
         id: result.id,
         name: result.name,
+        code: result.code,
         description: result.description,
         createdAt: result.createdAt.toISOString(),
         updatedAt: result.updatedAt.toISOString(),

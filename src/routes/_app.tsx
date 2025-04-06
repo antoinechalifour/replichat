@@ -10,6 +10,7 @@ import {
 import { UserButton } from "@clerk/tanstack-react-start";
 import { useUser } from "~/client/users";
 import { SetupApiKeyAlertDialog } from "~/components/SetupApiKeyAlertDialog";
+import { ModelSelect } from "~/components/models/ModelSelect";
 
 export const Route = createFileRoute("/_app")({
   ssr: false,
@@ -46,9 +47,7 @@ function RouteComponent() {
       </nav>
       <div className="grow shrink-0 flex flex-col bg-white min-h-screen">
         <header className="p-3 flex items-center justify-between">
-          <div className="text-lg font-semibold text-gray-500 px-3 py-1.5">
-            GPT 4o
-          </div>
+          <ModelSelect />
 
           <UserButton />
         </header>
