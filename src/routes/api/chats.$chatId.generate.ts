@@ -19,7 +19,7 @@ export const APIRoute = createAPIFileRoute("/api/chats/$chatId/generate")({
     });
 
     const result = streamText({
-      model: openai("gpt-4o"),
+      model: openai(user.currentModel.code),
       messages: chat.messages.map((message) => ({
         role: message.role.toLowerCase() as Lowercase<MessageRole>,
         content: message.content,
