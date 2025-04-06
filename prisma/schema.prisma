@@ -67,3 +67,12 @@ model Message {
   updatedAt DateTime    @updatedAt
   chat      Chat        @relation(fields: [chatId], references: [id], onDelete: Cascade)
 }
+
+model Model {
+  id          String   @id @default(cuid())
+  name        String
+  description String
+  code        String   @unique
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @default(now()) @updatedAt
+}
