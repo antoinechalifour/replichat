@@ -7,12 +7,7 @@ import {
   isCreatedToday,
   isCreatedYesterday,
 } from "~/client/chats";
-import {
-  SignedIn,
-  SignedOut,
-  SignInButton,
-  UserButton,
-} from "@clerk/tanstack-react-start";
+import { UserButton } from "@clerk/tanstack-react-start";
 import { useUser } from "~/client/users";
 import { SetupApiKeyAlertDialog } from "~/components/SetupApiKeyAlertDialog";
 
@@ -55,12 +50,7 @@ function RouteComponent() {
             GPT 4o
           </div>
 
-          <SignedIn>
-            <UserButton />
-          </SignedIn>
-          <SignedOut>
-            <SignInButton />
-          </SignedOut>
+          <UserButton />
         </header>
 
         <Outlet />
