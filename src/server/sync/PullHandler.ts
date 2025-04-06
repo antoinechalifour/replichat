@@ -81,16 +81,17 @@ export class PullHandler {
         cvrVersion: nextCVRVersion,
       });
 
+      const entities = typedFromEntries(
+        entityTypes.map((type) => [
+          type,
+          {
+            dels: diff[type].dels ?? [],
+            puts: entitiesDetails[type] ?? [],
+          },
+        ]),
+      );
       return {
-        entities: typedFromEntries(
-          entityTypes.map((type) => [
-            type,
-            {
-              dels: diff[type].dels ?? [],
-              puts: entitiesDetails[type] ?? [],
-            },
-          ]),
-        ),
+        entities,
         clients,
         nextCVR,
         nextCVRVersion,
