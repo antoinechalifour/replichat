@@ -7,6 +7,7 @@ import { ClientsAdapter } from "./Clients";
 import { CVRsAdapter } from "./CVRs";
 import { PrismaTransaction } from "~/server/prisma";
 import { mutators } from "./mutations";
+import { CVREntitiesAdapter } from "./CVREntities";
 
 interface ReplicacheSync {
   pull(userId: string, pullRequest: PullRequest): Promise<PullResponse>;
@@ -31,11 +32,12 @@ export class SyncServer implements ReplicacheSync {
 
 const clientGroups = new ClientGroupsAdapter();
 const cvrs = new CVRsAdapter();
+const cvrEntities = new CVREntitiesAdapter();
 const clients = new ClientsAdapter();
 const transaction = new PrismaTransaction();
 
 export const sync = new SyncServer(
-  new PullHandler(transaction, clientGroups, cvrs),
+  new PullHandler(transaction, clientGroups, cvrs, cvrEntities),
   new PushHandler(
     transaction,
     clientGroups,

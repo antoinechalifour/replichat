@@ -1,17 +1,17 @@
 import { PatchOperation, PullResponse } from "replicache";
 import { z } from "zod";
 import { Cookie, cookie } from "./Cookie";
-import { Transaction, tx } from "~/server/prisma";
-import { ChatViewModel } from "~/shared/ChatViewModel";
-import { ClientGroups } from "~/server/sync/ClientGroups";
-import { getClientVersionOfClientGroup } from "~/server/sync/Clients";
+import { Transaction } from "~/server/prisma";
+import { ClientGroups } from "./ClientGroups";
+import { getClientVersionOfClientGroup } from "./Clients";
 import {
   CVRs,
   diffCVR,
   isCVRDiffEmpty,
   ReplicacheCVR,
   ReplicacheCVREntries,
-} from "~/server/sync/CVRs";
+} from "./CVRs";
+import { CVREntities } from "./CVREntities";
 
 export const pullRequestSchema = z.object({
   clientGroupID: z.string(),
@@ -31,37 +31,18 @@ export const cvrEntriesFromSearch = (result: VersionSearchResult[]) => {
   return r;
 };
 
-async function getChatsVersion(userID: string) {
-  const results = await tx().chat.findMany({ where: { userId: userID } });
-  return results.map((result) => ({
-    id: result.id,
-    version: result.updatedAt.getTime(),
-  }));
-}
+async function promiseAllObject<T extends Record<string, Promise<any>>>(
+  obj: T,
+): Promise<{ [K in keyof T]: Awaited<T[K]> }> {
+  const keys = Object.keys(obj) as (keyof T)[];
+  const values = await Promise.all(keys.map((key) => obj[key]));
+  const result = {} as { [K in keyof T]: Awaited<T[K]> };
 
-async function getChats(ids: string[]) {
-  const results = await tx().chat.findMany({
-    where: { id: { in: ids } },
-    orderBy: { createdAt: "desc" },
-    include: {
-      messages: { orderBy: { createdAt: "asc" } },
-    },
+  keys.forEach((key, index) => {
+    result[key] = values[index];
   });
 
-  return results.map(
-    (result): ChatViewModel => ({
-      id: result.id,
-      title: result.title,
-      messages: result.messages.map((message) => ({
-        id: message.id,
-        content: message.content,
-        role: message.role,
-        createdAt: message.createdAt.toISOString(),
-        synced: true,
-      })),
-      createdAt: result.createdAt.toISOString(),
-    }),
-  );
+  return result;
 }
 
 export class PullHandler {
@@ -69,89 +50,69 @@ export class PullHandler {
     private readonly tx: Transaction,
     private readonly clientGroups: ClientGroups,
     private readonly cvrs: CVRs,
+    private readonly cvrEntities: CVREntities,
   ) {}
 
   async handle(userId: string, pull: PullRequest): Promise<PullResponse> {
-    // console.log("------------------------------------------------------");
-    // console.log("PULL");
-    // 1. let prevCVR = getCVR(body.cookie.cvrID)
     const prevCVR = pull.cookie
       ? await this.cvrs.get(pull.cookie.cvrID)
       : undefined;
-    // console.log("1 > prevCVR", prevCVR);
-    // 2. let baseCVR = prevCVR or default
     const baseCVR: ReplicacheCVR = prevCVR ?? {};
-    // console.log("2 > baseCVR", baseCVR);
 
-    // console.log("3 > Begin transaction");
-    // 3. Begin transaction
     const result = await this.tx.run("sync.pull", async () => {
-      // 4. getClientGroup(body.clientGroupID), or default
       const clientGroup = await this.clientGroups.get(
         pull.clientGroupID,
         userId,
       );
-      // console.log("4 > clientGroup", clientGroup);
-
-      // 6. Read all id/version pairs from the database that should be in the client view. This query can be any arbitrary function of the DB, including read authorization, paging, etc.
-      const [chatsVersion] = await Promise.all([getChatsVersion(userId)]);
-      // console.log("6 > chatsVersion", chatsVersion);
-
-      // 7: Read all clients in the client group.
+      const cvrEntities = await this.cvrEntities.getCVREntities(userId);
+      // TODO: migrate
       const clientsVersions = await getClientVersionOfClientGroup(
         pull.clientGroupID,
       );
-      // console.log("7 > clientsVersions", clientsVersions);
-
-      // 8. Build nextCVR from entities and clients.
       const nextCVR: ReplicacheCVR = {
-        chats: cvrEntriesFromSearch(chatsVersion),
+        ...Object.fromEntries(
+          cvrEntities.map((entity) => [entity.type, entity.entities]),
+        ),
         clients: cvrEntriesFromSearch(clientsVersions),
       };
-      // console.log("8 > nextCVR", nextCVR);
-
-      // 9. Calculate the difference between baseCVR and nextCVR
       const diff = diffCVR(baseCVR, nextCVR);
-      // console.log("9 > Diff", diff);
+      if (prevCVR && isCVRDiffEmpty(diff)) return null;
 
-      // 10. If prevCVR was found and two CVRs are identical then exit this transaction and return a no-op PullResopnse to client:
-      if (prevCVR && isCVRDiffEmpty(diff)) {
-        // console.log("10 > Empty diff", diff);
-        return null;
-      }
+      // TODO
+      const entityTypes = Object.keys(diff).filter((key) => key !== "clients");
+      const entities_new = await promiseAllObject(
+        Object.fromEntries(
+          entityTypes.map((type) => [
+            type,
+            this.cvrEntities.getEntities(userId, type, diff[type].puts),
+          ]),
+        ),
+      );
 
-      // 11. Fetch all entities from database that are new or changed between baseCVR and nextCVR
-      const [chats] = await Promise.all([getChats(diff.chats.puts)]);
-      // console.log("11 > chats", chats);
-
-      // 12. let clientChanges = clients that are new or changed since baseCVR
       const clients: ReplicacheCVREntries = {};
       for (const clientID of diff.clients.puts) {
         clients[clientID] = nextCVR.clients[clientID];
       }
-      // console.log("12 > clients", clients);
 
-      // 13. let nextCVRVersion = Math.max(pull.cookie?.order ?? 0, clientGroup.cvrVersion) + 1
       const baseCVRVersion = pull.cookie?.order ?? 0;
       const nextCVRVersion =
         Math.max(baseCVRVersion, clientGroup.cvrVersion) + 1;
-      // console.log(
-      //   "13 > base / next cvr version",
-      //   baseCVRVersion,
-      //   nextCVRVersion,
-      // );
 
-      // 14. putClientGroup():
       await this.clientGroups.save({
         ...clientGroup,
         cvrVersion: nextCVRVersion,
       });
-      // console.log("14 > Saved client group");
 
       return {
-        entities: {
-          chats: { dels: diff.chats.dels, puts: chats },
-        },
+        entities: Object.fromEntries(
+          entityTypes.map((type) => [
+            type,
+            {
+              dels: diff[type].dels ?? [],
+              puts: entities_new[type] ?? [],
+            },
+          ]),
+        ),
         clients,
         nextCVR,
         nextCVRVersion,
@@ -209,6 +170,7 @@ export class PullHandler {
     const lastMutationIDChanges = clients;
 
     // console.log("------------------------------------------------------");
+    console.log("Patch", patch);
 
     return {
       cookie,
