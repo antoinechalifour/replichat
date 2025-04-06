@@ -10,9 +10,11 @@ yarn.lock
 .vinxi
 
 /build/
+/dist/
 /api/
 /server/build
 /public/build
+.netlify
 .vinxi
 # Sentry Config File
 .env.sentry-build-plugin
