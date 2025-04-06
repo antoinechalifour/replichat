@@ -46,11 +46,17 @@ export class PushHandler {
     errorMode = false,
   ) {
     return this.tx.run("sync.push", async () => {
-      const clientGroup = await this.clientGroups.get(clientGroupID, userID);
+      const clientGroup = await this.clientGroups.getOrNew(
+        clientGroupID,
+        userID,
+      );
       // 4. Verify requesting user owns specified client group.
       if (clientGroup.userID !== userID) throw unauthorized();
       // 5. getClient(mutation.clientID) or default
-      const client = await this.clients.get(mutation.clientID, clientGroup.id);
+      const client = await this.clients.getOrNew(
+        mutation.clientID,
+        clientGroup.id,
+      );
       // 6. Verify requesting client group owns requested client
       if (client.clientGroupID !== clientGroupID) throw unauthorized();
       // 7. let nextMutationID = client.lastMutationID + 1

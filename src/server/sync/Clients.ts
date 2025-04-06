@@ -8,7 +8,7 @@ export type ReplicacheClient = {
 };
 
 export interface Clients {
-  get(id: string, clientGroupId: string): Promise<ReplicacheClient>;
+  getOrNew(id: string, clientGroupId: string): Promise<ReplicacheClient>;
   save(client: ReplicacheClient): Promise<void>;
   getVersionsInClientGroup(
     clientGroupID: string,
@@ -16,7 +16,7 @@ export interface Clients {
 }
 
 export class ClientsAdapter implements Clients {
-  async get(id: string, clientGroupId: string): Promise<ReplicacheClient> {
+  async getOrNew(id: string, clientGroupId: string): Promise<ReplicacheClient> {
     const client = await tx().replicacheClient.findFirst({
       where: { id },
     });

@@ -45,7 +45,7 @@ export class PullHandler {
     const baseCVR: ReplicacheCVR = prevCVR ?? {};
 
     const result = await this.tx.run("sync.pull", async () => {
-      const clientGroup = await this.clientGroups.get(
+      const clientGroup = await this.clientGroups.getOrNew(
         pull.clientGroupID,
         userId,
       );
