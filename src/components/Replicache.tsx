@@ -39,14 +39,14 @@ const mutators = {
   },
   createChat: async (
     tx: WriteTransaction,
-    args: { id: string; message: string },
+    args: { id: string; messageId: string; message: string },
   ) => {
     await tx.set(chatKey(args.id), {
       id: args.id,
       title: "Untitled",
       messages: [
         {
-          id: crypto.randomUUID(),
+          id: args.messageId,
           content: args.message,
           role: "USER",
           createdAt: new Date().toISOString(),
@@ -73,7 +73,7 @@ const mutators = {
   },
   sendMessage: async (
     tx: WriteTransaction,
-    args: { chatId: string; message: string },
+    args: { chatId: string; messageId: string; message: string },
   ) => {
     const chat = await tx.get<ChatViewModel>(chatKey(args.chatId));
     if (chat == null) return;
@@ -81,7 +81,7 @@ const mutators = {
       ...chat,
       messages: [
         ...chat.messages,
-        { id: crypto.randomUUID(), content: args.message, role: "USER" },
+        { id: args.messageId, content: args.message, role: "USER" },
       ],
     });
   },

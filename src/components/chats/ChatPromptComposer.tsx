@@ -1,5 +1,6 @@
 import { PromptComposer } from "~/components/chats/PromptComposer";
 import { useReplicache } from "~/components/Replicache";
+import { getChatMessageId } from "~/components/chats/ChatMessageList";
 
 export function ChatPromptComposer({
   chatId,
@@ -10,10 +11,13 @@ export function ChatPromptComposer({
 }) {
   const r = useReplicache();
   const onSubmit = async (message: string) => {
+    const messageId = crypto.randomUUID();
     await r.mutate.sendMessage({
       chatId,
+      messageId,
       message,
     });
+    document.querySelector(`#${getChatMessageId(messageId)}`)?.scrollIntoView();
   };
 
   return (

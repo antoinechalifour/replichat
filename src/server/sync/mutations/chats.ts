@@ -41,6 +41,7 @@ export const createChat = createMutationHandler("createChat")
     z
       .object({
         id: z.string(),
+        messageId: z.string(),
         message: z.string(),
       })
       .parse(args),
@@ -52,7 +53,11 @@ export const createChat = createMutationHandler("createChat")
         userId: ctx.userId,
         version: 1,
         messages: {
-          create: { role: "USER", content: args.message },
+          create: {
+            id: args.messageId,
+            role: "USER",
+            content: args.message,
+          },
         },
       },
     });
@@ -92,6 +97,7 @@ export const sendMessage = createMutationHandler("sendMessage")
     z
       .object({
         chatId: z.string(),
+        messageId: z.string(),
         message: z.string(),
       })
       .parse(args),
@@ -103,6 +109,7 @@ export const sendMessage = createMutationHandler("sendMessage")
     });
     await tx().message.create({
       data: {
+        id: args.messageId,
         content: args.message,
         role: "USER",
         chatId: args.chatId,

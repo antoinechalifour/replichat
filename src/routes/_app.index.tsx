@@ -13,6 +13,7 @@ function Home() {
   const onSubmit = async (message: string) => {
     const id = await r.mutate.createChat({
       id: crypto.randomUUID(),
+      messageId: crypto.randomUUID(),
       message,
     });
     await navigate({
