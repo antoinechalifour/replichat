@@ -35,9 +35,8 @@ export const Route = createRootRouteWithContext<{
         content: "width=device-width, initial-scale=1",
       },
       ...seo({
-        title:
-          "TanStack Start | Type-Safe, Client-First, Full-Stack React Framework",
-        description: `TanStack Start is a type-safe, client-first, full-stack React framework. `,
+        title: "RepliChat | A local-first LLM chat",
+        description: `RepliChat is a local-first chat app.`,
       }),
     ],
     links: [
@@ -45,7 +44,7 @@ export const Route = createRootRouteWithContext<{
       {
         rel: "apple-touch-icon",
         sizes: "180x180",
-        href: "/apple-touch-icon.png",
+        href: "/apple-icon.png",
       },
       {
         rel: "icon",
