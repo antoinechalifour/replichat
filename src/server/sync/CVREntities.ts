@@ -1,6 +1,7 @@
 import { tx } from "~/server/prisma";
 import { ChatViewModel } from "~/shared/ChatViewModel";
 import { promiseAllObject } from "~/utils/promises";
+import { UserViewModel } from "~/shared/UserViewModel";
 
 export type CVREntitiesVersions = {
   chats: Record<string, number>;
@@ -10,11 +11,6 @@ export type CVREntitiesVersions = {
 type FetchPatchedEntitiesParams = {
   chats: string[];
   users: string[];
-};
-
-type UserViewModel = {
-  id: string;
-  hasOpenAiApiKey: boolean;
 };
 
 type CVREntitiesDetails = {

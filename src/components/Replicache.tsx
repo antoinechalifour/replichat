@@ -1,19 +1,18 @@
 import * as React from "react";
 import {
   createContext,
+  DependencyList,
   PropsWithChildren,
   use,
-  useState,
-  DependencyList,
   useEffect,
+  useState,
 } from "react";
 import { unstable_batchedUpdates } from "react-dom";
 import { Replicache, WriteTransaction } from "replicache";
 import { ChatViewModel } from "~/shared/ChatViewModel";
 import { pusher } from "~/client/pusher";
 import { channelForUser } from "~/shared/Pusher";
-
-const chatKey = (id: string) => `chats/${id}`;
+import { chatKey } from "~/client/chats";
 
 const mutators = {
   createChat: async (

@@ -4,9 +4,12 @@ import { ChatViewModel } from "~/shared/ChatViewModel";
 import { DateTime } from "luxon";
 import { useReplicache, useSubscribe } from "~/components/Replicache";
 
+export const CHATS_PREFIX = "chats/";
+export const chatKey = (id: string) => `${CHATS_PREFIX}${id}`;
+
 async function getChats(tx: ReadTransaction) {
   const chats = await tx
-    .scan<ChatViewModel>({ prefix: "chats/" })
+    .scan<ChatViewModel>({ prefix: CHATS_PREFIX })
     .values()
     .toArray();
 
@@ -42,7 +45,7 @@ export function useFilteredChats(filterFn: FilterChatFn) {
 }
 
 async function getChat(tx: ReadTransaction, chatId: string) {
-  const chat = await tx.get<ChatViewModel>(`chats/${chatId}`);
+  const chat = await tx.get<ChatViewModel>(chatKey(chatId));
   if (chat == null) return null;
   return { ...chat } as ChatViewModel;
 }
@@ -64,7 +67,6 @@ export const isCreatedYesterday = (chat: ChatViewModel) => {
   const yesterday = DateTime.now().minus({ day: 1 }).toISODate();
   return DateTime.fromISO(chat.createdAt).toISODate() === yesterday;
 };
-
 export const isCreatedPrevious7Days = (chat: ChatViewModel) => {
   const yesterday = DateTime.now().minus({ day: 1 }).toISODate();
   const limit = DateTime.now().minus({ day: 8 }).toISODate();

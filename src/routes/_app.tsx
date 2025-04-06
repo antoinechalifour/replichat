@@ -3,8 +3,8 @@ import { PenSquareIcon } from "lucide-react";
 import { Icon } from "~/components/Icon";
 import { NavFilteredChatList } from "~/components/chats/NavFilteredChatList";
 import {
-  isCreatedToday,
   isCreatedPrevious7Days,
+  isCreatedToday,
   isCreatedYesterday,
 } from "~/client/chats";
 import {
@@ -13,6 +13,8 @@ import {
   SignInButton,
   UserButton,
 } from "@clerk/tanstack-react-start";
+import { useUser } from "~/client/users";
+import { SetupApiKeyAlertDialog } from "~/components/SetupApiKeyAlertDialog";
 
 export const Route = createFileRoute("/_app")({
   ssr: false,
@@ -21,6 +23,10 @@ export const Route = createFileRoute("/_app")({
 
 function RouteComponent() {
   const navigate = useNavigate();
+  const user = useUser();
+
+  // TODO: loading screen
+  if (user == null) return null;
 
   return (
     <main className="bg-gray-50 flex items-start">
@@ -59,6 +65,8 @@ function RouteComponent() {
 
         <Outlet />
       </div>
+
+      {!user.hasOpenAiApiKey && <SetupApiKeyAlertDialog />}
     </main>
   );
 }
