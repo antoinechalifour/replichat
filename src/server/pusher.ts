@@ -2,10 +2,10 @@ import Pusher from "pusher";
 import { channelForUser } from "~/shared/Pusher";
 
 export const pusher = new Pusher({
-  appId: import.meta.env.PUSHER_APP_ID,
+  appId: process.env.PUSHER_APP_ID!,
   key: import.meta.env.VITE_PUSHER_APP_KEY,
-  secret: import.meta.env.PUSHER_APP_SECRET,
-  cluster: import.meta.env.PUSHER_APP_CLUSTER,
+  secret: process.env.PUSHER_APP_SECRET!,
+  cluster: process.env.PUSHER_APP_CLUSTER!,
   useTLS: true,
 });
 
