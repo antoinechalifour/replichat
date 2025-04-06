@@ -3,7 +3,6 @@ import { z } from "zod";
 import { Cookie, cookie } from "./Cookie";
 import { Transaction } from "~/server/prisma";
 import { ClientGroups } from "./ClientGroups";
-import { getClientVersionOfClientGroup } from "./Clients";
 import {
   CVRs,
   diffCVR,
@@ -12,6 +11,9 @@ import {
   ReplicacheCVREntries,
 } from "./CVRs";
 import { CVREntities } from "./CVREntities";
+import { VersionSearchResult } from "~/server/sync/Version";
+import { promiseAllObject } from "~/utils/promises";
+import { Clients } from "~/server/sync/Clients";
 
 export const pullRequestSchema = z.object({
   clientGroupID: z.string(),
@@ -19,10 +21,6 @@ export const pullRequestSchema = z.object({
 });
 export type PullRequest = z.infer<typeof pullRequestSchema>;
 
-export type VersionSearchResult = {
-  id: string;
-  version: number;
-};
 export const cvrEntriesFromSearch = (result: VersionSearchResult[]) => {
   const r: ReplicacheCVREntries = {};
   for (const row of result) {
@@ -31,24 +29,11 @@ export const cvrEntriesFromSearch = (result: VersionSearchResult[]) => {
   return r;
 };
 
-async function promiseAllObject<T extends Record<string, Promise<any>>>(
-  obj: T,
-): Promise<{ [K in keyof T]: Awaited<T[K]> }> {
-  const keys = Object.keys(obj) as (keyof T)[];
-  const values = await Promise.all(keys.map((key) => obj[key]));
-  const result = {} as { [K in keyof T]: Awaited<T[K]> };
-
-  keys.forEach((key, index) => {
-    result[key] = values[index];
-  });
-
-  return result;
-}
-
 export class PullHandler {
   constructor(
     private readonly tx: Transaction,
     private readonly clientGroups: ClientGroups,
+    private readonly clients: Clients,
     private readonly cvrs: CVRs,
     private readonly cvrEntities: CVREntities,
   ) {}
@@ -65,8 +50,7 @@ export class PullHandler {
         userId,
       );
       const cvrEntities = await this.cvrEntities.getCVREntities(userId);
-      // TODO: migrate
-      const clientsVersions = await getClientVersionOfClientGroup(
+      const clientsVersions = await this.clients.getVersionsInClientGroup(
         pull.clientGroupID,
       );
       const nextCVR: ReplicacheCVR = {

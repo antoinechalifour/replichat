@@ -1,6 +1,5 @@
 import { tx } from "~/server/prisma";
-
-import { VersionSearchResult } from "~/server/sync/PullHandler";
+import { VersionSearchResult } from "~/server/sync/Version";
 
 export type ReplicacheClient = {
   id: string;
@@ -11,6 +10,9 @@ export type ReplicacheClient = {
 export interface Clients {
   get(id: string, clientGroupId: string): Promise<ReplicacheClient>;
   save(client: ReplicacheClient): Promise<void>;
+  getVersionsInClientGroup(
+    clientGroupID: string,
+  ): Promise<VersionSearchResult[]>;
 }
 
 export class ClientsAdapter implements Clients {
@@ -48,17 +50,17 @@ export class ClientsAdapter implements Clients {
       },
     });
   }
-}
 
-export async function getClientVersionOfClientGroup(
-  clientGroupID: string,
-): Promise<VersionSearchResult[]> {
-  const results = await tx().replicacheClient.findMany({
-    where: { clientGroupId: clientGroupID },
-  });
+  async getVersionsInClientGroup(
+    clientGroupID: string,
+  ): Promise<VersionSearchResult[]> {
+    const results = await tx().replicacheClient.findMany({
+      where: { clientGroupId: clientGroupID },
+    });
 
-  return results.map((result) => ({
-    id: result.id,
-    version: result.lastMutationId,
-  }));
+    return results.map((result) => ({
+      id: result.id,
+      version: result.lastMutationId,
+    }));
+  }
 }

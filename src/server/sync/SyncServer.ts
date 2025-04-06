@@ -37,7 +37,7 @@ const clients = new ClientsAdapter();
 const transaction = new PrismaTransaction();
 
 export const sync = new SyncServer(
-  new PullHandler(transaction, clientGroups, cvrs, cvrEntities),
+  new PullHandler(transaction, clientGroups, clients, cvrs, cvrEntities),
   new PushHandler(
     transaction,
     clientGroups,
