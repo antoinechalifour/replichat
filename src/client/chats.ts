@@ -52,8 +52,13 @@ async function getChat(tx: ReadTransaction, chatId: string) {
 
 export function useChat(chatId: string) {
   const r = useReplicache();
+  const promise = useMemo(
+    () => r.query((tx) => getChat(tx, chatId)),
+    [chatId, r],
+  );
+  const chat = use(promise);
   return useSubscribe(r, (tx) => getChat(tx, chatId), {
-    default: null,
+    default: chat,
     dependencies: [chatId],
   });
 }

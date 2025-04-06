@@ -23,6 +23,7 @@ model User {
   replicacheClientGroups ReplicacheClientGroup[]
   chats                  Chat[]
   currentModel           Model                   @relation(fields: [currentModelId], references: [id])
+  replicacheCVRs         ReplicacheCVR[]
 }
 
 model ReplicacheClientGroup {
@@ -42,6 +43,15 @@ model ReplicacheClient {
   createdAt      DateTime              @default(now())
   updatedAt      DateTime              @updatedAt
   clientGroup    ReplicacheClientGroup @relation(fields: [clientGroupId], references: [id])
+}
+
+model ReplicacheCVR {
+  id        String   @id
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  cvr       Json
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Chat {

@@ -52,12 +52,12 @@ export class CVREntitiesAdapter implements CVREntities {
 
   getEntitiesDetails(
     userId: string,
-    { chats, users }: FetchPatchedEntitiesParams,
+    { chats, users, models }: FetchPatchedEntitiesParams,
   ): Promise<CVREntitiesDetails> {
     return promiseAllObject({
       chats: this.fetchChats(userId, chats),
       users: this.fetchUsers(userId, users),
-      models: this.fetchModels(),
+      models: this.fetchModels(models),
     });
   }
 
@@ -107,8 +107,10 @@ export class CVREntitiesAdapter implements CVREntities {
     );
   }
 
-  private async fetchModels() {
-    const results = await tx().model.findMany();
+  private async fetchModels(models: string[]) {
+    const results = await tx().model.findMany({
+      where: { id: { in: models } },
+    });
     return results.map(
       (result): ModelViewModel => ({
         id: result.id,

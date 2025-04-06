@@ -40,7 +40,7 @@ export class PullHandler {
 
   async handle(userId: string, pull: PullRequest): Promise<PullResponse> {
     const prevCVR = pull.cookie
-      ? await this.cvrs.get(pull.cookie.cvrID)
+      ? await this.cvrs.get(pull.cookie.cvrID, userId)
       : undefined;
     const baseCVR: ReplicacheCVR = prevCVR ?? {};
 
@@ -90,6 +90,7 @@ export class PullHandler {
           },
         ]),
       );
+
       return {
         entities,
         clients,
@@ -112,7 +113,7 @@ export class PullHandler {
     const cvrID = crypto.randomUUID();
 
     // 17. putCVR(nextCVR)
-    await this.cvrs.save(cvrID, nextCVR);
+    await this.cvrs.save(cvrID, userId, nextCVR);
     // console.log("17 > Updated cvr", nextCVR);
 
     /* 18.

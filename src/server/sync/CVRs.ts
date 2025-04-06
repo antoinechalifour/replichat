@@ -1,19 +1,33 @@
+import { prisma } from "~/server/prisma";
+
 export type ReplicacheCVREntries = Record<string, number>;
 export type ReplicacheCVR = Record<string, ReplicacheCVREntries>;
-const cvrCache = new Map<string, ReplicacheCVR>();
 
 export interface CVRs {
-  get(id: string): Promise<ReplicacheCVR | undefined>;
-  save(id: string, cvr: ReplicacheCVR): Promise<void>;
+  get(id: string, userId: string): Promise<ReplicacheCVR | undefined>;
+  save(id: string, userId: string, cvr: ReplicacheCVR): Promise<void>;
 }
 
 export class CVRsAdapter implements CVRs {
-  async get(id: string): Promise<ReplicacheCVR | undefined> {
-    return cvrCache.get(id);
+  async get(id: string, userId: string): Promise<ReplicacheCVR | undefined> {
+    const result = await prisma.replicacheCVR.findFirst({
+      where: {
+        id,
+        userId,
+      },
+    });
+    if (result == null) return;
+    return result.cvr as ReplicacheCVR;
   }
 
-  async save(id: string, cvr: ReplicacheCVR): Promise<void> {
-    cvrCache.set(id, cvr);
+  async save(id: string, userId: string, cvr: ReplicacheCVR): Promise<void> {
+    await prisma.replicacheCVR.create({
+      data: {
+        id,
+        userId,
+        cvr,
+      },
+    });
   }
 }
 
