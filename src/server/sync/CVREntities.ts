@@ -2,20 +2,24 @@ import { tx } from "~/server/prisma";
 import { ChatViewModel } from "~/shared/ChatViewModel";
 import { promiseAllObject } from "~/utils/promises";
 import { UserViewModel } from "~/shared/UserViewModel";
+import { ModelViewModel } from "~/shared/ModelViewModel";
 
 export type CVREntitiesVersions = {
   chats: Record<string, number>;
   users: Record<string, number>;
+  models: Record<string, number>;
 };
 
 type FetchPatchedEntitiesParams = {
   chats: string[];
   users: string[];
+  models: string[];
 };
 
 type CVREntitiesDetails = {
   chats: ChatViewModel[];
   users: UserViewModel[];
+  models: ModelViewModel[];
 };
 
 export interface CVREntities {
@@ -28,7 +32,7 @@ export interface CVREntities {
 
 export class CVREntitiesAdapter implements CVREntities {
   async getEntitiesVersion(userId: string): Promise<CVREntitiesVersions> {
-    const [chats, users] = await Promise.all([
+    const [chats, users, models] = await Promise.all([
       tx().chat.findMany({
         where: { userId },
         select: { id: true, updatedAt: true },
@@ -36,11 +40,13 @@ export class CVREntitiesAdapter implements CVREntities {
       tx().user.findMany({
         where: { id: userId },
       }),
+      tx().model.findMany(),
     ]);
 
     return {
       chats: this.cvrEntities(chats),
       users: this.cvrEntities(users),
+      models: this.cvrEntities(models),
     };
   }
 
@@ -51,6 +57,7 @@ export class CVREntitiesAdapter implements CVREntities {
     return promiseAllObject({
       chats: this.fetchChats(userId, chats),
       users: this.fetchUsers(userId, users),
+      models: this.fetchModels(),
     });
   }
 
@@ -95,6 +102,19 @@ export class CVREntitiesAdapter implements CVREntities {
       (result): UserViewModel => ({
         id: result.id,
         hasOpenAiApiKey: result.openAiApiKey != null,
+      }),
+    );
+  }
+
+  private async fetchModels() {
+    const results = await tx().model.findMany();
+    return results.map(
+      (result): ModelViewModel => ({
+        id: result.id,
+        name: result.name,
+        description: result.description,
+        createdAt: result.createdAt.toISOString(),
+        updatedAt: result.updatedAt.toISOString(),
       }),
     );
   }
