@@ -2,18 +2,21 @@ import { z } from "zod";
 import { createMutationHandler } from "../MutationHandler";
 import { prisma, tx } from "~/server/prisma";
 import { generateText } from "ai";
-import { openai } from "@ai-sdk/openai";
+import { createOpenAI } from "@ai-sdk/openai";
 import { poke } from "~/server/pusher";
 
 async function generateChatName(userId: string, chatId: string) {
   const chat = await prisma.chat.findFirstOrThrow({
     where: { id: chatId },
     include: {
+      user: true,
       messages: { orderBy: { createdAt: "asc" }, take: 1 },
     },
   });
   const message = chat.messages[0];
-  if (message == null) return;
+  const apiKey = chat.user.openAiApiKey;
+  if (message == null || apiKey == null) return;
+  const openai = createOpenAI({ apiKey: apiKey });
 
   const response = await generateText({
     model: openai("gpt-4o-mini"),

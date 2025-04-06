@@ -1,7 +1,7 @@
 import { createAPIFileRoute } from "@tanstack/react-start/api";
 import { prisma, runTransaction, tx } from "~/server/prisma";
 import { streamText } from "ai";
-import { openai } from "@ai-sdk/openai";
+import { createOpenAI } from "@ai-sdk/openai";
 import { MessageRole } from "@prisma/client";
 import { poke } from "~/server/pusher";
 import { authenticate } from "~/server/auth";
@@ -9,6 +9,8 @@ import { authenticate } from "~/server/auth";
 export const APIRoute = createAPIFileRoute("/api/chats/$chatId/generate")({
   POST: async ({ request, params }) => {
     const user = await authenticate(request);
+    if (user.openAiApiKey == null) throw new Error("No OpenAI API key found");
+    const openai = createOpenAI({ apiKey: user.openAiApiKey });
     const chat = await prisma.chat.findFirstOrThrow({
       where: { id: params.chatId },
       include: {
@@ -42,6 +44,8 @@ export const APIRoute = createAPIFileRoute("/api/chats/$chatId/generate")({
         poke(user.id);
       },
     });
+
+    void result.consumeStream();
 
     return result.toTextStreamResponse();
   },
