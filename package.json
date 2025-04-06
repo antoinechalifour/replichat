@@ -5,10 +5,10 @@
   "type": "module",
   "scripts": {
     "dev": "vinxi dev",
+    "postinstall": "prisma generate",
     "build": "vinxi build",
-    "build:netlify": "npm run build && npm run prisma:migrate && npm run prisma:generate",
+    "build:netlify": "npm run build && npm run prisma:migrate",
     "prisma:migrate": "prisma migrate deploy",
-    "prisma:generate": "prisma generate",
     "start": "vinxi start",
     "lint": "eslint src",
     "tsc": "tsc"
