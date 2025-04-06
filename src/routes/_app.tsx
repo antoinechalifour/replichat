@@ -66,7 +66,7 @@ function RouteComponent() {
         <Outlet />
       </div>
 
-      {!user.hasOpenAiApiKey && <SetupApiKeyAlertDialog />}
+      {!user.hasOpenAiApiKey && <SetupApiKeyAlertDialog userId={user.id} />}
     </main>
   );
 }

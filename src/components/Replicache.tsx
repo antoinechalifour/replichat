@@ -13,8 +13,21 @@ import { ChatViewModel } from "~/shared/ChatViewModel";
 import { pusher } from "~/client/pusher";
 import { channelForUser } from "~/shared/Pusher";
 import { chatKey } from "~/client/chats";
+import { userPrefix } from "~/client/users";
+import { UserViewModel } from "~/shared/UserViewModel";
 
 const mutators = {
+  setApiKey: async (
+    tx: WriteTransaction,
+    args: { userId: string; apiKey: string },
+  ) => {
+    const user = await tx.get<UserViewModel>(userPrefix(args.userId));
+    if (user == null) throw new Error("User not found");
+    await tx.set(userPrefix(args.userId), {
+      ...user,
+      hasOpenAiApiKey: true,
+    } satisfies UserViewModel);
+  },
   createChat: async (
     tx: WriteTransaction,
     args: { id: string; message: string },

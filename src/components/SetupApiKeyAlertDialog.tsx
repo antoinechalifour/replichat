@@ -2,12 +2,14 @@ import { z } from "zod";
 import clsx from "clsx";
 import { useForm } from "@tanstack/react-form";
 import { AlertDialog } from "~/components/AlertDialog";
+import { useReplicache } from "~/components/Replicache";
 
 const FormSchema = z.object({
   apiKey: z.string().min(1, "An API key is required"),
 });
 
-export function SetupApiKeyAlertDialog() {
+export function SetupApiKeyAlertDialog({ userId }: { userId: string }) {
+  const r = useReplicache();
   const form = useForm({
     defaultValues: {
       apiKey: "",
@@ -16,10 +18,8 @@ export function SetupApiKeyAlertDialog() {
       onMount: FormSchema,
       onChange: FormSchema,
     },
-
-    onSubmit: ({ value }) => {
-      console.log(value);
-    },
+    onSubmit: ({ value }) =>
+      r.mutate.setApiKey({ apiKey: value.apiKey, userId }),
   });
 
   return (
@@ -31,9 +31,7 @@ export function SetupApiKeyAlertDialog() {
           title="Let's Get Started!"
           confirmText="Save & Continue"
           confirmDisabled={!canSubmit}
-          onConfirm={() => {
-            console.log("BOOM !");
-          }}
+          onConfirm={() => form.handleSubmit()}
         >
           <p className="text-sm mb-4">
             Welcome aboard! To unlock our full suite of features, please enter

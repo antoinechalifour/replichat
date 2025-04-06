@@ -110,7 +110,6 @@ export class PullHandler {
 
     // 16. let nextCVRID = randomID()
     const cvrID = crypto.randomUUID();
-    console.log(nextCVR);
 
     // 17. putCVR(nextCVR)
     await this.cvrs.save(cvrID, nextCVR);
