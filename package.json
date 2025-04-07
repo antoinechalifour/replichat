@@ -5,7 +5,6 @@
   "type": "module",
   "scripts": {
     "dev": "vinxi dev",
-    "postinstall": "prisma generate",
     "build": "NODE_ENV=production vinxi build",
     "build:netlify": "npm run build && npm run prisma:migrate",
     "prisma:migrate": "prisma migrate deploy",
