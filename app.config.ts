@@ -5,9 +5,6 @@ export default defineConfig({
   tsr: {
     appDirectory: "src",
   },
-  server: {
-    preset: "vercel",
-  },
   vite: {
     plugins: [
       tsConfigPaths({
