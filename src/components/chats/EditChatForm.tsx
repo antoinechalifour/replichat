@@ -29,7 +29,7 @@ export function EditChatForm({
         e.preventDefault();
         return form.handleSubmit();
       }}
-      className="-m-2 p-1 rounded-lg"
+      className="-m-2 grow p-1 rounded-lg"
     >
       <form.Field name="title">
         {(field) => (

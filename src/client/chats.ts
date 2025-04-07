@@ -1,4 +1,3 @@
-import { use, useMemo } from "react";
 import { ReadTransaction } from "replicache";
 import { ChatViewModel } from "~/shared/ChatViewModel";
 import { DateTime } from "luxon";
@@ -33,13 +32,8 @@ function sortByCreatedAtDesc(
 
 export function useFilteredChats(filterFn: FilterChatFn) {
   const r = useReplicache();
-  const promise = useMemo(
-    () => r.query((tx) => getChatsWithFilter(tx, filterFn)),
-    [r, filterFn],
-  );
-  const defaultChats = use(promise);
   return useSubscribe(r, (tx) => getChatsWithFilter(tx, filterFn), {
-    default: defaultChats,
+    default: [],
     dependencies: [filterFn],
   });
 }
@@ -52,13 +46,8 @@ async function getChat(tx: ReadTransaction, chatId: string) {
 
 export function useChat(chatId: string) {
   const r = useReplicache();
-  const promise = useMemo(
-    () => r.query((tx) => getChat(tx, chatId)),
-    [chatId, r],
-  );
-  const chat = use(promise);
   return useSubscribe(r, (tx) => getChat(tx, chatId), {
-    default: chat,
+    default: null,
     dependencies: [chatId],
   });
 }
