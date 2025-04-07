@@ -6,7 +6,7 @@ import { useReplicache, useSubscribe } from "~/components/Replicache";
 export const CHATS_PREFIX = "chats/";
 export const chatKey = (id: string) => `${CHATS_PREFIX}${id}`;
 
-async function getChats(tx: ReadTransaction) {
+export async function getChats(tx: ReadTransaction) {
   const chats = await tx
     .scan<ChatViewModel>({ prefix: CHATS_PREFIX })
     .values()
