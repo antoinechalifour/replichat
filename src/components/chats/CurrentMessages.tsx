@@ -6,17 +6,19 @@ import { StreamedMessage } from "./StreamedMessage";
 export function CurrentMessages({
   messages,
   containerHeight,
+  scrollBehavior,
   stream,
 }: {
   messages: ChatMessageViewModel[];
   containerHeight: number;
+  scrollBehavior: "smooth" | "auto";
   stream: null | { chatId: string; messageId: string };
 }) {
   return (
     <div
       className="scroll-m-10 flex flex-col gap-4"
       style={{ minHeight: `${containerHeight}px` }}
-      ref={(node) => node?.scrollIntoView({ behavior: "smooth" })}
+      ref={(node) => node?.scrollIntoView({ behavior: scrollBehavior })}
     >
       <ChatMessageList messages={messages} />
 

@@ -4,12 +4,15 @@ import { useReplicache } from "~/components/Replicache";
 export function ChatPromptComposer({
   chatId,
   disabled,
+  onSubmitted,
 }: {
   chatId: string;
   disabled: boolean;
+  onSubmitted(): void;
 }) {
   const r = useReplicache();
   const onSubmit = async (message: string) => {
+    onSubmitted();
     const messageId = crypto.randomUUID();
     await r.mutate.sendMessage({
       chatId,

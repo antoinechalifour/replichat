@@ -6,6 +6,7 @@ import { ChatMessageList } from "~/components/chats/ChatMessageList";
 import { useRedirectOnNotFound } from "~/client/hooks/useRedirectOnNotFound";
 import { ChatMessageViewModel } from "~/shared/ChatMessageViewModel";
 import { CurrentMessages } from "~/components/chats/CurrentMessages";
+import { useRef } from "react";
 
 export const Route = createFileRoute("/_app/chats/$chatId")({
   ssr: false,
@@ -42,6 +43,7 @@ function RouteComponent() {
   const chat = useChat(params.chatId);
   useRedirectOnNotFound(chat);
   const [ref, size] = useMeasure<HTMLDivElement>();
+  const scrollBehaviorRef = useRef<"auto" | "smooth">("auto");
 
   if (chat == null) return null;
 
@@ -65,12 +67,17 @@ function RouteComponent() {
             <CurrentMessages
               messages={currentMessages}
               containerHeight={size.height}
+              scrollBehavior={scrollBehaviorRef.current}
               stream={stream}
             />
           </div>
         </div>
       </div>
-      <ChatPromptComposer chatId={params.chatId} disabled={stream != null} />
+      <ChatPromptComposer
+        onSubmitted={() => (scrollBehaviorRef.current = "smooth")}
+        chatId={params.chatId}
+        disabled={stream != null}
+      />
     </>
   );
 }
