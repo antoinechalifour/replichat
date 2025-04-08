@@ -16,7 +16,7 @@ export function CurrentMessages({
 }) {
   return (
     <div
-      className="scroll-m-10 flex flex-col gap-4"
+      className="scroll-m-4 flex flex-col gap-4"
       style={{ minHeight: `${containerHeight}px` }}
       ref={(node) => node?.scrollIntoView({ behavior: scrollBehavior })}
     >

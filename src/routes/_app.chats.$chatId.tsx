@@ -11,6 +11,7 @@ import { useRef } from "react";
 export const Route = createFileRoute("/_app/chats/$chatId")({
   ssr: false,
   component: RouteComponent,
+  remountDeps: ({ params }) => params,
 });
 
 function splitMessages(
@@ -61,7 +62,7 @@ function RouteComponent() {
   return (
     <>
       <div className="grow flex flex-col overflow-hidden relative" ref={ref}>
-        <div className="absolute p-3 pb-10 inset-0 overflow-y-auto">
+        <div className="absolute p-3 pb-10 inset-0 overflow-y-auto animate-fade-in">
           <div className="mx-auto max-w-2xl grow flex flex-col gap-4">
             <ChatMessageList messages={oldMessages} />
             <CurrentMessages
