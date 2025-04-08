@@ -35,13 +35,8 @@ export function StreamedMessage({
     }),
   });
 
-  return (
-    <div>
-      {message == null ? (
-        <Icon as={LoaderIcon} className="animate-spin text-gray-500" />
-      ) : (
-        <Markdown>{message.join("")}</Markdown>
-      )}
-    </div>
-  );
+  if (message == null)
+    return <Icon as={LoaderIcon} className="animate-spin text-gray-500" />;
+
+  return <Markdown>{message.join("")}</Markdown>;
 }
