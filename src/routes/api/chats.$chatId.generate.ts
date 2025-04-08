@@ -20,10 +20,20 @@ export const APIRoute = createAPIFileRoute("/api/chats/$chatId/generate")({
 
     const result = streamText({
       model: openai(user.currentModel.code),
-      messages: chat.messages.map((message) => ({
-        role: message.role.toLowerCase() as Lowercase<MessageRole>,
-        content: message.content,
-      })),
+      messages: [
+        {
+          role: "system",
+          content:
+            "You are a helpful assistant. Answer the user's questions. You may use markdown to format your answers.",
+        },
+        ...chat.messages.map((message) => ({
+          role:
+            message.role === "USER"
+              ? ("user" as const)
+              : ("assistant" as const),
+          content: message.content,
+        })),
+      ],
       onFinish: async (message) => {
         await runTransaction(async () => {
           await tx().chat.update({
