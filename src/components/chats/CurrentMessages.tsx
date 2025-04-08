@@ -10,14 +10,16 @@ export function CurrentMessages({
   stream,
 }: {
   messages: ChatMessageViewModel[];
-  containerHeight: number;
+  containerHeight: number | null;
   scrollBehavior: "smooth" | "auto";
   stream: null | { chatId: string; messageId: string };
 }) {
   return (
     <div
       className="scroll-m-4 flex flex-col gap-4"
-      style={{ minHeight: `${containerHeight}px` }}
+      style={{
+        minHeight: containerHeight != null ? `${containerHeight}px` : undefined,
+      }}
       ref={(node) => node?.scrollIntoView({ behavior: scrollBehavior })}
     >
       <ChatMessageList messages={messages} />
