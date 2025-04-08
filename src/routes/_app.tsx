@@ -20,7 +20,7 @@ function RouteComponent() {
     <main className="bg-gray-50 flex items-start">
       <Navbar />
       <div className="grow shrink-0 flex flex-col bg-white min-h-screen">
-        <header className="p-3 flex items-center justify-between">
+        <header className="p-3 flex items-center justify-between border-b border-gray-100">
           <ModelSelect user={user} />
 
           <UserButton />

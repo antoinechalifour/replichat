@@ -1,6 +1,5 @@
 import { PromptComposer } from "~/components/chats/PromptComposer";
 import { useReplicache } from "~/components/Replicache";
-import { getChatMessageId } from "~/components/chats/ChatMessageList";
 
 export function ChatPromptComposer({
   chatId,
@@ -17,7 +16,6 @@ export function ChatPromptComposer({
       messageId,
       message,
     });
-    document.querySelector(`#${getChatMessageId(messageId)}`)?.scrollIntoView();
   };
 
   return (

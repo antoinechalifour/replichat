@@ -35,16 +35,13 @@ export function StreamedMessage({
     }),
   });
 
-  if (message == null)
-    return <Icon as={LoaderIcon} className="animate-spin text-gray-500" />;
-
   return (
-    <div
-      ref={(node) => {
-        node?.scrollIntoView();
-      }}
-    >
-      <Markdown>{message.join("")}</Markdown>
+    <div>
+      {message == null ? (
+        <Icon as={LoaderIcon} className="animate-spin text-gray-500" />
+      ) : (
+        <Markdown>{message.join("")}</Markdown>
+      )}
     </div>
   );
 }
