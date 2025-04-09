@@ -7,7 +7,7 @@ import {
   isCreatedYesterday,
 } from "~/client/chats";
 import { IconButton } from "./IconButton";
-import { SearchDialog } from "./SearchDialog";
+import { SearchDialogButton } from "./SearchDialogButton";
 
 export function Navbar() {
   const navigate = useNavigate();
@@ -18,9 +18,7 @@ export function Navbar() {
         <p className="p-2 text-sm font-semibold text-gray-600 mr-auto">
           RepliChat
         </p>
-        <SearchDialog>
-          <IconButton title="Search" icon={SearchIcon} />
-        </SearchDialog>
+        <SearchDialogButton />
         <IconButton
           title="Create chat"
           onClick={() => navigate({ to: "/" })}
