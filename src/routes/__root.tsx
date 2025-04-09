@@ -17,6 +17,7 @@ import { getWebRequest } from "@tanstack/react-start/server";
 import { ReplicacheProvider } from "~/components/Replicache";
 import { authenticateOrNull } from "~/server/auth";
 import { PropsWithChildren } from "react";
+import { Tooltip } from "radix-ui";
 
 const fetchAuth = createServerFn({ method: "GET" }).handler(() =>
   authenticateOrNull(getWebRequest()!),
@@ -120,7 +121,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
           <HeadContent />
         </head>
         <body>
-          {children}
+          <Tooltip.Provider>{children}</Tooltip.Provider>
           <ReactQueryDevtools buttonPosition="bottom-left" />
           <Scripts />
         </body>

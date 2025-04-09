@@ -1,17 +1,13 @@
-import { useNavigate } from "@tanstack/react-router";
-import { PenSquareIcon, SearchIcon } from "lucide-react";
 import { NavFilteredChatList } from "./chats/NavFilteredChatList";
 import {
   isCreatedPrevious7Days,
   isCreatedToday,
   isCreatedYesterday,
 } from "~/client/chats";
-import { IconButton } from "./IconButton";
 import { SearchDialogButton } from "./SearchDialogButton";
+import { CreateChatButton } from "~/components/CreateChatButton";
 
 export function Navbar() {
-  const navigate = useNavigate();
-
   return (
     <nav className="p-3 w-64 h-screen sticky top-0 flex flex-col">
       <div className="flex items-center">
@@ -19,11 +15,7 @@ export function Navbar() {
           RepliChat
         </p>
         <SearchDialogButton />
-        <IconButton
-          title="Create chat"
-          onClick={() => navigate({ to: "/" })}
-          icon={PenSquareIcon}
-        />
+        <CreateChatButton />
       </div>
 
       <div className="grow overflow-y-auto space-y-5 pt-5">
