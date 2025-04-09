@@ -24,7 +24,7 @@ function Home() {
 
   return (
     <div className="flex flex-col grow items-center justify-center">
-      <h1 className="text-balance font-semibold text-3xl mb-4">
+      <h1 className="text-balance font-medium text-3xl mb-6">
         What can I help with?
       </h1>
       <div className="max-w-2xl w-full">
