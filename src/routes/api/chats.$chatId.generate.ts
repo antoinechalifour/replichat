@@ -27,7 +27,6 @@ async function writeToRedisStream(args: {
         await redis.xadd(chatMessageStreamName(args), "*", "type", "end");
         return;
       }
-      console.log("[OpenAI] Writing to Redis", value);
       await redis.xadd(
         chatMessageStreamName(args),
         "*",
@@ -145,7 +144,6 @@ async function readFromStream(args: { chatId: string; messageId: string }) {
         for await (const chunk of readRedisStream(
           chatMessageStreamName(args),
         )) {
-          console.log("[Redis] chunk", chunk);
           controller.enqueue(chunk);
         }
         controller.close();
