@@ -4,42 +4,20 @@ import { streamText } from "ai";
 import { createOpenAI } from "@ai-sdk/openai";
 import { poke } from "~/server/pusher";
 import { authenticate } from "~/server/auth";
-import { createRedis, redis } from "~/server/redis";
+import {
+  consumeRedisStream,
+  redis,
+  writeReadableStreamToRedisStream,
+} from "~/server/redis";
 import { Message } from "@prisma/client";
+import { z } from "zod";
+import {
+  asyncIterableToReadableStream,
+  streamTextResponse,
+} from "~/server/stream";
 
-function chatMessageStreamName(args: { chatId: string; messageId: string }) {
-  return `stream_chat:${args.chatId}:reply_to:${args.messageId}`;
-}
-
-async function writeToRedisStream(args: {
-  chatId: string;
-  messageId: string;
-  readable: ReadableStream<string>;
-}) {
-  const reader = args.readable.getReader();
-  const redis = createRedis();
-
-  try {
-    await redis.xadd(chatMessageStreamName(args), "*", "type", "init");
-    while (true) {
-      const { value, done } = await reader.read();
-      if (done) {
-        await redis.xadd(chatMessageStreamName(args), "*", "type", "end");
-        return;
-      }
-      await redis.xadd(
-        chatMessageStreamName(args),
-        "*",
-        "type",
-        "delta",
-        "delta",
-        value,
-      );
-    }
-  } catch (err) {
-    console.log("writeToRedisStream", err);
-  }
-}
+const chatMessageStreamName = (args: { chatId: string; messageId: string }) =>
+  `stream_chat:${args.chatId}:reply_to:${args.messageId}`;
 
 async function doCallOpenAI(args: {
   apiKey: string;
@@ -50,7 +28,6 @@ async function doCallOpenAI(args: {
 }) {
   console.log("[OpenAI] Streaming...");
   const openai = createOpenAI({ apiKey: args.apiKey });
-  const replyToId = args.messages[args.messages.length - 1].id;
   const result = streamText({
     model: openai(args.model),
     messages: [
@@ -87,78 +64,27 @@ async function doCallOpenAI(args: {
   });
 
   void result.consumeStream();
-
-  const [a, b] = result.textStream.tee();
-  void writeToRedisStream({
-    readable: b,
-    chatId: args.chatId,
-    messageId: replyToId,
-  });
-
-  return new Response(a.pipeThrough(new TextEncoderStream()), {
-    status: 200,
-    headers: {
-      contentType: "text/plain; charset=utf-8",
-    },
-  });
+  return result;
 }
 
-async function* readRedisStream(streamName: string) {
-  let lastId = "0";
-  const redis = createRedis();
+const ChunkSchema = z
+  .object({ type: z.literal("init") })
+  .or(z.object({ type: z.literal("end") }))
+  .or(z.object({ type: z.literal("delta"), delta: z.string() }));
 
-  while (true) {
-    const result = await redis.xread("BLOCK", 0, "STREAMS", streamName, lastId);
-    if (result) {
-      for (const [, messages] of result) {
-        for (const [id, fields] of messages) {
-          // Convert the flat array of fields to an object.
-          const chunk: Record<string, string> = {};
-          for (let i = 0; i < fields.length; i += 2) {
-            chunk[fields[i]] = fields[i + 1];
-          }
-
-          lastId = id;
-
-          const theChunk = chunk as
-            | { type: "init" }
-            | { type: "end" }
-            | { type: "delta"; delta: string };
-
-          if (theChunk.type === "delta") yield theChunk.delta;
-
-          if (chunk.type === "end") {
-            return;
-          }
-        }
-      }
-    }
-  }
-}
-
-async function readFromStream(args: { chatId: string; messageId: string }) {
+function streamFromCache(streamName: string) {
   console.log("[Redis] Streaming...");
-  const stream = new ReadableStream({
-    async pull(controller) {
-      try {
-        for await (const chunk of readRedisStream(
-          chatMessageStreamName(args),
-        )) {
-          controller.enqueue(chunk);
-        }
-        controller.close();
-      } catch (e) {
-        controller.error(e);
-      }
-    },
-  });
-
-  return new Response(stream.pipeThrough(new TextEncoderStream()), {
-    status: 200,
-    headers: {
-      contentType: "text/plain; charset=utf-8",
-    },
-  });
+  return asyncIterableToReadableStream(
+    consumeRedisStream({
+      streamName,
+      parseChunk: (chunk) => ChunkSchema.parse(chunk),
+      getYieldedChunk: (chunk) => {
+        if (chunk.type === "delta") return chunk.delta;
+        return null;
+      },
+      isComplete: (chunk) => chunk.type === "end",
+    }),
+  );
 }
 
 export const APIRoute = createAPIFileRoute("/api/chats/$chatId/generate")({
@@ -170,29 +96,32 @@ export const APIRoute = createAPIFileRoute("/api/chats/$chatId/generate")({
         messages: { orderBy: { createdAt: "asc" } },
       },
     });
-    const exists = await redis.exists(
-      chatMessageStreamName({
-        chatId: chat.id,
-        messageId: chat.messages[chat.messages.length - 1].id,
-      }),
-    );
-    console.log("[Generate]", chat.id, "exists", exists === 0);
+    const streamName = chatMessageStreamName({
+      chatId: chat.id,
+      messageId: chat.messages[chat.messages.length - 1].id,
+    });
+    const exists = await redis.exists(streamName);
 
     if (exists === 1) {
-      return readFromStream({
-        chatId: chat.id,
-        messageId: chat.messages[chat.messages.length - 1].id,
-      });
+      return streamTextResponse(streamFromCache(streamName));
     } else {
       if (user.openAiApiKey == null) throw new Error("No OpenAI API key found");
 
-      return doCallOpenAI({
+      const result = await doCallOpenAI({
         apiKey: user.openAiApiKey,
         model: user.currentModel.code,
         messages: chat.messages,
         userId: user.id,
         chatId: params.chatId,
       });
+
+      const [forClient, forCache] = result.textStream.tee();
+      void writeReadableStreamToRedisStream({
+        streamName,
+        readableStream: forCache,
+      });
+
+      return streamTextResponse(forClient);
     }
   },
 });
