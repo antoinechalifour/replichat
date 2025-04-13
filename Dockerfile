@@ -31,6 +31,9 @@ RUN npx prisma generate
 # Copy application code
 COPY . .
 
+ENV VITE_PUSHER_APP_KEY="12be12b25df890ae5927"
+ENV VITE_REPLICACHE_LICENSE_KEY="lef07a45d807142ad93c18a139c5dc34b"
+
 # Build application
 RUN npm run build
 
