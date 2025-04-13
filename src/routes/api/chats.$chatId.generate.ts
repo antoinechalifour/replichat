@@ -6,7 +6,7 @@ import { poke } from "~/server/pusher";
 import { authenticate } from "~/server/auth";
 import {
   consumeRedisStream,
-  redis,
+  createRedis,
   writeReadableStreamToRedisStream,
 } from "~/server/redis";
 import { Message } from "@prisma/client";
@@ -15,6 +15,25 @@ import {
   asyncIterableToReadableStream,
   streamTextResponse,
 } from "~/server/stream";
+
+function createStreamCache(streamName: string) {
+  const redis = createRedis();
+
+  const exists = async () => {
+    const result = await redis.exists(streamName);
+    return result === 1;
+  };
+
+  const create = () => redis.xadd(streamName, "*", "type", "init");
+  const write = (readableStream: ReadableStream<string>) =>
+    writeReadableStreamToRedisStream({
+      redis,
+      streamName,
+      readableStream,
+    });
+  const end = () => redis.xadd(streamName, "*", "type", "end");
+  return { exists, create, write, end };
+}
 
 const chatMessageStreamName = (args: { chatId: string; messageId: string }) =>
   `stream_chat:${args.chatId}:reply_to:${args.messageId}`;
@@ -100,11 +119,14 @@ export const APIRoute = createAPIFileRoute("/api/chats/$chatId/generate")({
       chatId: chat.id,
       messageId: chat.messages[chat.messages.length - 1].id,
     });
-    const exists = await redis.exists(streamName);
 
-    if (exists === 1) {
+    const streamCache = createStreamCache(streamName);
+    const exists = await streamCache.exists();
+
+    if (exists) {
       return streamTextResponse(streamFromCache(streamName));
     } else {
+      await streamCache.create();
       if (user.openAiApiKey == null) throw new Error("No OpenAI API key found");
 
       const result = await doCallOpenAI({
@@ -116,10 +138,7 @@ export const APIRoute = createAPIFileRoute("/api/chats/$chatId/generate")({
       });
 
       const [forClient, forCache] = result.textStream.tee();
-      void writeReadableStreamToRedisStream({
-        streamName,
-        readableStream: forCache,
-      });
+      void streamCache.write(forCache).then(() => streamCache.end());
 
       return streamTextResponse(forClient);
     }

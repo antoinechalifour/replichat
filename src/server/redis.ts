@@ -43,23 +43,15 @@ export async function* consumeRedisStream<TChunk, TYield>({
 }
 
 export async function writeReadableStreamToRedisStream(args: {
+  redis: Redis;
   readableStream: ReadableStream<string>;
   streamName: string;
 }) {
   const reader = args.readableStream.getReader();
-  const redis = createRedis();
 
-  try {
-    await redis.xadd(args.streamName, "*", "type", "init");
-    while (true) {
-      const { value, done } = await reader.read();
-      if (done) {
-        await redis.xadd(args.streamName, "*", "type", "end");
-        return;
-      }
-      await redis.xadd(args.streamName, "*", "type", "delta", "delta", value);
-    }
-  } catch (err) {
-    console.log("writeReadableStreamToRedisStream", err);
+  while (true) {
+    const { value, done } = await reader.read();
+    if (done) return;
+    await redis.xadd(args.streamName, "*", "type", "delta", "delta", value);
   }
 }
