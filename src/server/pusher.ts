@@ -1,6 +1,10 @@
 import Pusher from "pusher";
 import { channelForUser } from "~/shared/Pusher";
 
+console.log("------------ server ----------");
+console.log(process.env);
+console.log("------------------------------");
+
 export const pusher = new Pusher({
   appId: process.env.PUSHER_APP_ID!,
   key: process.env.VITE_PUSHER_APP_KEY!,
