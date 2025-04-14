@@ -1,9 +1,0 @@
-ignoredBuiltDependencies:
-  - '@parcel/watcher'
-
-onlyBuiltDependencies:
-  - '@clerk/shared'
-  - '@prisma/client'
-  - '@prisma/engines'
-  - esbuild
-  - prisma
