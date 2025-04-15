@@ -18,7 +18,10 @@ export function EditChatForm({
       onChange: z.object({ title: z.string().min(1, "Title is required") }),
     },
     onSubmit: async ({ value }) => {
-      await r.mutate.updateChat({ chatId: chat.id, title: value.title });
+      await r.mutate.updateChat({
+        id: chat.id,
+        updates: { title: value.title },
+      });
       onDone();
     },
   });

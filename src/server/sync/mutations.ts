@@ -1,7 +1,7 @@
 import {
   createChatMutation,
   deleteChatMutation,
-  sendMessageMutation,
+  addUserMessageMutation,
   updateChatMutation,
 } from "./mutations/chats";
 import { setApiKeyMutation, setCurrentModelMutation } from "./mutations/users";
@@ -12,7 +12,7 @@ export const mutators = {
   [createChatMutation.mutationName]: createChatMutation,
   [updateChatMutation.mutationName]: updateChatMutation,
   [deleteChatMutation.mutationName]: deleteChatMutation,
-  [sendMessageMutation.mutationName]: sendMessageMutation,
+  [addUserMessageMutation.mutationName]: addUserMessageMutation,
 } as const;
 
 export type MutationNames = keyof typeof mutators;

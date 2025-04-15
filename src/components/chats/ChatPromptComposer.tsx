@@ -13,11 +13,12 @@ export function ChatPromptComposer({
   const r = useReplicache();
   const onSubmit = async (message: string) => {
     onSubmitted();
-    const messageId = crypto.randomUUID();
-    await r.mutate.sendMessage({
+    await r.mutate.addUserMessage({
       chatId,
-      messageId,
-      message,
+      message: {
+        id: crypto.randomUUID(),
+        content: message,
+      },
     });
   };
 

@@ -39,15 +39,15 @@ const mutators = {
   },
   createChat: async (
     tx: WriteTransaction,
-    args: { id: string; messageId: string; message: string },
+    args: { id: string; message: { id: string; content: string } },
   ) => {
     await tx.set(chatKey(args.id), {
       id: args.id,
       title: "Untitled",
       messages: [
         {
-          id: args.messageId,
-          content: args.message,
+          id: args.message.id,
+          content: args.message.content,
           role: "USER",
           createdAt: new Date().toISOString(),
           synced: false,
@@ -59,21 +59,26 @@ const mutators = {
   },
   updateChat: async (
     tx: WriteTransaction,
-    args: { chatId: string; title: string },
+    args: {
+      id: string;
+      updates: {
+        title: string;
+      };
+    },
   ) => {
-    const chat = await tx.get<ChatViewModel>(chatKey(args.chatId));
+    const chat = await tx.get<ChatViewModel>(chatKey(args.id));
     if (chat == null) return;
-    await tx.set(chatKey(args.chatId), {
+    await tx.set(chatKey(args.id), {
       ...chat,
-      title: args.title,
+      title: args.updates.title,
     });
   },
-  deleteChat: async (tx: WriteTransaction, args: { chatId: string }) => {
-    await tx.del(chatKey(args.chatId));
+  deleteChat: async (tx: WriteTransaction, args: { id: string }) => {
+    await tx.del(chatKey(args.id));
   },
-  sendMessage: async (
+  addUserMessage: async (
     tx: WriteTransaction,
-    args: { chatId: string; messageId: string; message: string },
+    args: { chatId: string; message: { id: string; content: string } },
   ) => {
     const chat = await tx.get<ChatViewModel>(chatKey(args.chatId));
     if (chat == null) return;
@@ -81,7 +86,7 @@ const mutators = {
       ...chat,
       messages: [
         ...chat.messages,
-        { id: args.messageId, content: args.message, role: "USER" },
+        { id: args.message.id, content: args.message.content, role: "USER" },
       ],
     });
   },

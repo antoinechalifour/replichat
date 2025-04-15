@@ -20,12 +20,10 @@ export class Chat {
     public readonly messages: Message[],
   ) {}
 
-  addMessage(args: { role: MessageRole; message: string }) {
+  addMessage(args: { id: string; role: MessageRole; message: string }) {
     if (this.lastMessageAddedBy(args.role)) throw new Error(`Invalid role`);
 
-    this.messages.push(
-      new Message(crypto.randomUUID(), args.message, args.role),
-    );
+    this.messages.push(new Message(args.id, args.message, args.role));
   }
 
   private lastMessageAddedBy(role: MessageRole) {

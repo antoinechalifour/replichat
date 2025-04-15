@@ -13,7 +13,7 @@ export function DeleteChatAlertDialog({
 }) {
   const r = useReplicache();
 
-  const onConfirm = () => r.mutate.deleteChat({ chatId: chat.id });
+  const onConfirm = () => r.mutate.deleteChat({ id: chat.id });
 
   return (
     <DeleteAlertDialog

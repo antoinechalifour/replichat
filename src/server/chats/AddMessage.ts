@@ -6,15 +6,17 @@ export class AddMessage {
 
   async execute({
     chatId,
-    message,
+    messageId,
+    messageContent,
     role,
   }: {
     chatId: string;
     role: MessageRole;
-    message: string;
+    messageId: string;
+    messageContent: string;
   }) {
     const chat = await this.chats.ofId(chatId);
-    chat.addMessage({ message, role });
+    chat.addMessage({ id: messageId, message: messageContent, role });
     await this.chats.save(chat);
   }
 }

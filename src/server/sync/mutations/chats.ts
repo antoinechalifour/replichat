@@ -6,6 +6,7 @@ import { createOpenAI } from "@ai-sdk/openai";
 import { poke } from "~/server/pusher";
 import { createChat } from "~/server/chats/CreateChat";
 import { updateChat } from "~/server/chats/UpdateChat";
+import { addMessage } from "~/server/chats/AddMessage";
 
 async function generateChatName(userId: string, chatId: string) {
   const chat = await prisma.chat.findFirstOrThrow({
@@ -43,9 +44,10 @@ export const createChatMutation = createMutationHandler("createChat")
     z
       .object({
         id: z.string(),
-        // TODO: message object + content
-        messageId: z.string(),
-        message: z.string(),
+        message: z.object({
+          id: z.string(),
+          content: z.string(),
+        }),
       })
       .parse(args),
   )
@@ -53,7 +55,7 @@ export const createChatMutation = createMutationHandler("createChat")
     await createChat.execute({
       id: args.id,
       userId: ctx.userId,
-      message: { id: args.messageId, content: args.message },
+      message: args.message,
     });
     // TODO: post-commit
     setTimeout(() => generateChatName(ctx.userId, args.id), 1000);
@@ -63,19 +65,18 @@ export const updateChatMutation = createMutationHandler("updateChat")
   .validate((args) =>
     z
       .object({
-        // TODO: mutation schema
-        chatId: z.string(),
-        title: z.string(),
+        id: z.string(),
+        updates: z.object({
+          title: z.string(),
+        }),
       })
       .parse(args),
   )
   .handler(({ args, ctx }) =>
     updateChat.execute({
-      id: args.chatId,
+      id: args.id,
       userId: ctx.userId,
-      updates: {
-        title: args.title,
-      },
+      updates: args.updates,
     }),
   );
 
@@ -83,36 +84,31 @@ export const deleteChatMutation = createMutationHandler("deleteChat")
   .validate((args) =>
     z
       .object({
-        chatId: z.string(),
+        id: z.string(),
       })
       .parse(args),
   )
   .handler(async ({ args, ctx }) => {
-    await tx().chat.delete({ where: { id: args.chatId, userId: ctx.userId } });
+    await tx().chat.delete({ where: { id: args.id, userId: ctx.userId } });
   });
 
-// TODO: addMessage
-export const sendMessageMutation = createMutationHandler("sendMessage")
+export const addUserMessageMutation = createMutationHandler("addUserMessage")
   .validate((args) =>
     z
       .object({
         chatId: z.string(),
-        messageId: z.string(),
-        message: z.string(),
+        message: z.object({
+          id: z.string(),
+          content: z.string(),
+        }),
       })
       .parse(args),
   )
-  .handler(async ({ args }) => {
-    await tx().chat.update({
-      where: { id: args.chatId },
-      data: { version: { increment: 1 } },
-    });
-    await tx().message.create({
-      data: {
-        id: args.messageId,
-        content: args.message,
-        role: "USER",
-        chatId: args.chatId,
-      },
-    });
-  });
+  .handler(({ args }) =>
+    addMessage.execute({
+      chatId: args.chatId,
+      messageId: args.message.id,
+      messageContent: args.message.content,
+      role: "USER",
+    }),
+  );
