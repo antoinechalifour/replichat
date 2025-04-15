@@ -15,6 +15,7 @@ import {
   asyncIterableToReadableStream,
   streamTextResponse,
 } from "~/server/stream";
+import { addMessage } from "~/server/chats/AddMessage";
 
 function createStreamCache(streamName: string) {
   const redis = createRedis();
@@ -62,22 +63,13 @@ async function doCallOpenAI(args: {
       })),
     ],
     onFinish: async (message) => {
-      await runTransaction(async () => {
-        await tx().chat.update({
-          where: { id: args.chatId },
-          data: {
-            version: { increment: 1 },
-          },
-        });
-        await tx().message.create({
-          data: {
-            id: crypto.randomUUID(),
-            content: message.text,
-            chatId: args.chatId,
-            role: "SYSTEM",
-          },
-        });
-      });
+      await runTransaction(() =>
+        addMessage.execute({
+          chatId: args.chatId,
+          message: message.text,
+          role: "SYSTEM",
+        }),
+      );
       poke(args.userId);
     },
   });
