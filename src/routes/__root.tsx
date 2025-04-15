@@ -6,18 +6,19 @@ import {
 } from "@tanstack/react-router";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import * as React from "react";
+import { PropsWithChildren } from "react";
 import type { QueryClient } from "@tanstack/react-query";
 import { DefaultCatchBoundary } from "~/components/DefaultCatchBoundary";
 import { NotFound } from "~/components/NotFound";
 import appCss from "~/styles/app.css?url";
 import { seo } from "~/utils/seo";
-import { ClerkProvider, SignInButton } from "@clerk/tanstack-react-start";
+import { ClerkProvider } from "@clerk/tanstack-react-start";
 import { createServerFn } from "@tanstack/react-start";
 import { getWebRequest } from "@tanstack/react-start/server";
 import { ReplicacheProvider } from "~/components/Replicache";
 import { authenticateOrNull } from "~/server/auth";
-import { PropsWithChildren } from "react";
 import { Tooltip } from "radix-ui";
+import { LandingPage } from "~/components/landing/LandingPage";
 
 const fetchAuth = createServerFn({ method: "GET" }).handler(() =>
   authenticateOrNull(getWebRequest()!),
@@ -78,14 +79,6 @@ export const Route = createRootRouteWithContext<{
   component: RootComponent,
 });
 
-function LoginPage() {
-  return (
-    <main className="h-screen flex items-center justify-center">
-      <SignInButton />
-    </main>
-  );
-}
-
 function ClientOnly({ children }: PropsWithChildren) {
   const [mounted, setMounted] = React.useState(false);
   React.useEffect(() => {
@@ -100,7 +93,7 @@ function RootComponent() {
     <RootDocument>
       {user == null ? (
         <div>
-          <LoginPage />
+          <LandingPage />
         </div>
       ) : (
         <ClientOnly>
