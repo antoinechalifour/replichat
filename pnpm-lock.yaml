@@ -91,6 +91,9 @@ importers:
       tailwind-merge:
         specifier: 2.6.0
         version: 2.6.0
+      typed-emitter:
+        specifier: ^2.1.0
+        version: 2.1.0
       vinxi:
         specifier: 0.5.3
         version: 0.5.3(@types/node@22.5.4)(db0@0.3.1)(ioredis@5.6.1)(jiti@2.4.2)(terser@5.39.0)(tsx@4.19.3)(yaml@2.7.1)
@@ -4864,6 +4867,9 @@ packages:
   type-fest@4.39.1:
     resolution: {integrity: sha512-uW9qzd66uyHYxwyVBYiwS4Oi0qZyUqwjU+Oevr6ZogYiXt99EOYtwvzMSLw1c3lYo2HzJsep/NB23iEVEgjG/w==}
     engines: {node: '>=16'}
+
+  typed-emitter@2.1.0:
+    resolution: {integrity: sha512-g/KzbYKbH5C2vPkaXGu8DJlHrGKHLsM25Zg9WuC9pMGfuvT+X25tZQWo5fK1BjBm8+UrVE9LDCvaY0CQk+fXDA==}
 
   typescript-eslint@8.29.0:
     resolution: {integrity: sha512-ep9rVd9B4kQsZ7ZnWCVxUE/xDLUUUsRzE0poAeNu+4CkFErLfuvPt/qtm2EpnSyfvsR0S6QzDFSrPCFBwf64fg==}
@@ -10528,6 +10534,10 @@ snapshots:
   type-fest@2.19.0: {}
 
   type-fest@4.39.1: {}
+
+  typed-emitter@2.1.0:
+    optionalDependencies:
+      rxjs: 7.8.2
 
   typescript-eslint@8.29.0(eslint@9.24.0(jiti@2.4.2))(typescript@5.7.2):
     dependencies:

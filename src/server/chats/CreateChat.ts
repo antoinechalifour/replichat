@@ -1,6 +1,7 @@
 import { Chats, ChatsAdapter } from "./Chats";
 import { Chat, Message } from "./Chat";
 import { postCommit } from "~/server/prisma";
+import { emitter } from "~/server/emitter";
 
 export class CreateChat {
   constructor(private readonly chats: Chats) {}
@@ -15,7 +16,10 @@ export class CreateChat {
     await this.chats.save(chat);
 
     postCommit(() => {
-      console.log("Transaction commited !");
+      emitter.emit("chat.created", {
+        chatId: chat.id,
+        userId: chat.userId,
+      });
     });
   }
 }
