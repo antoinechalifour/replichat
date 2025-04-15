@@ -20,8 +20,8 @@ function createStreamCache(streamName: string) {
   const redis = createRedis();
 
   const exists = async () => {
-    const result = await redis.exists(streamName);
-    return result === 1;
+    const result = await redis.set(`${streamName}:lock`, "1", "EX", 60, "NX");
+    return result !== "OK";
   };
 
   const create = () => redis.xadd(streamName, "*", "type", "init");
