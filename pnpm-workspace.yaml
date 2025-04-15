@@ -1,2 +1,4 @@
 patchedDependencies:
   react-dom: patches/react-dom.patch
+
+packages: []
