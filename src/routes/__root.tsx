@@ -11,14 +11,17 @@ import { DefaultCatchBoundary } from "~/components/DefaultCatchBoundary";
 import { NotFound } from "~/components/NotFound";
 import appCss from "~/styles/app.css?url";
 import { seo } from "~/utils/seo";
-import {
-  ClerkProvider,
-  SignInButton,
-  useAuth,
-} from "@clerk/tanstack-react-start";
+import { ClerkProvider, SignInButton } from "@clerk/tanstack-react-start";
+import { createServerFn } from "@tanstack/react-start";
+import { getWebRequest } from "@tanstack/react-start/server";
 import { ReplicacheProvider } from "~/components/Replicache";
+import { authenticateOrNull } from "~/server/auth";
 import { PropsWithChildren } from "react";
 import { Tooltip } from "radix-ui";
+
+const fetchAuth = createServerFn({ method: "GET" }).handler(() =>
+  authenticateOrNull(getWebRequest()!),
+);
 
 export const Route = createRootRouteWithContext<{
   queryClient: QueryClient;
@@ -68,14 +71,11 @@ export const Route = createRootRouteWithContext<{
       </RootDocument>
     );
   },
-  notFoundComponent: () => <NotFound />,
-  component: () => {
-    return (
-      <RootDocument>
-        <RootComponent />
-      </RootDocument>
-    );
+  loader: () => {
+    return fetchAuth();
   },
+  notFoundComponent: () => <NotFound />,
+  component: RootComponent,
 });
 
 function LoginPage() {
@@ -95,21 +95,21 @@ function ClientOnly({ children }: PropsWithChildren) {
 }
 
 function RootComponent() {
-  const auth = useAuth();
+  const user = Route.useLoaderData();
   return (
-    <>
-      {auth.userId == null ? (
+    <RootDocument>
+      {user == null ? (
         <div>
           <LoginPage />
         </div>
       ) : (
         <ClientOnly>
-          <ReplicacheProvider userId={auth.userId}>
+          <ReplicacheProvider userId={user.id}>
             <Outlet />
           </ReplicacheProvider>
         </ClientOnly>
       )}
-    </>
+    </RootDocument>
   );
 }
 
