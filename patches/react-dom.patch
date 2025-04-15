@@ -1,0 +1,70 @@
+diff --git a/cjs/react-dom-client.development.js b/cjs/react-dom-client.development.js
+index 83ea1c6a783efe2e674eda4b681eb361f000d12d..7c87b2f6ce317de1e1fbfce7a67633692b8d909f 100644
+--- a/cjs/react-dom-client.development.js
++++ b/cjs/react-dom-client.development.js
+@@ -23953,7 +23953,7 @@
+       workInProgressRootRecoverableErrors = null,
+       workInProgressRootDidIncludeRecursiveRenderUpdate = !1,
+       globalMostRecentFallbackTime = 0,
+-      FALLBACK_THROTTLE_MS = 300,
++      FALLBACK_THROTTLE_MS = 0,
+       workInProgressRootRenderTargetTime = Infinity,
+       RENDER_TIMEOUT_MS = 500,
+       workInProgressTransitions = null,
+diff --git a/cjs/react-dom-client.production.js b/cjs/react-dom-client.production.js
+index af7283abaca3e5812ef71b03d9c999410baa1a80..639a6712d145121602530140493ce21db8cd8edb 100644
+--- a/cjs/react-dom-client.production.js
++++ b/cjs/react-dom-client.production.js
+@@ -10391,7 +10391,7 @@ function performWorkOnRoot(root$jscomp$0, lanes, forceSync) {
+         shouldTimeSlice.finishedLanes = lanes;
+         if (
+           (lanes & 62914560) === lanes &&
+-          ((renderWasConcurrent = globalMostRecentFallbackTime + 300 - now()),
++          ((renderWasConcurrent = globalMostRecentFallbackTime + 0 - now()),
+           10 < renderWasConcurrent)
+         ) {
+           markRootSuspended(
+@@ -11260,7 +11260,7 @@ function pingSuspendedRoot(root, wakeable, pingedLanes) {
+     (3 === workInProgressRootExitStatus &&
+       (workInProgressRootRenderLanes & 62914560) ===
+         workInProgressRootRenderLanes &&
+-      300 > now() - globalMostRecentFallbackTime)
++      0 > now() - globalMostRecentFallbackTime)
+       ? 0 === (executionContext & 2) && prepareFreshStack(root, 0)
+       : (workInProgressRootPingedLanes |= pingedLanes),
+     workInProgressSuspendedRetryLanes === workInProgressRootRenderLanes &&
+diff --git a/cjs/react-dom-profiling.development.js b/cjs/react-dom-profiling.development.js
+index 7847cbd3088efe236122a518f23b5eea1d8d49cb..dca4f227bad7cd0fd6f731b9f4a13911c61384ff 100644
+--- a/cjs/react-dom-profiling.development.js
++++ b/cjs/react-dom-profiling.development.js
+@@ -24010,7 +24010,7 @@
+       workInProgressRootRecoverableErrors = null,
+       workInProgressRootDidIncludeRecursiveRenderUpdate = !1,
+       globalMostRecentFallbackTime = 0,
+-      FALLBACK_THROTTLE_MS = 300,
++      FALLBACK_THROTTLE_MS = 0,
+       workInProgressRootRenderTargetTime = Infinity,
+       RENDER_TIMEOUT_MS = 500,
+       workInProgressTransitions = null,
+diff --git a/cjs/react-dom-profiling.profiling.js b/cjs/react-dom-profiling.profiling.js
+index 98a9f0b64da582d054f57c77c79e1b3ad0cde070..c7c6a052f99a26097dab6334eadb4bd882d8cf96 100644
+--- a/cjs/react-dom-profiling.profiling.js
++++ b/cjs/react-dom-profiling.profiling.js
+@@ -10913,7 +10913,7 @@ function performWorkOnRoot(root$jscomp$0, lanes, forceSync) {
+         shouldTimeSlice.finishedLanes = lanes;
+         if (
+           (lanes & 62914560) === lanes &&
+-          ((renderWasConcurrent = globalMostRecentFallbackTime + 300 - now$1()),
++          ((renderWasConcurrent = globalMostRecentFallbackTime + 0 - now$1()),
+           10 < renderWasConcurrent)
+         ) {
+           markRootSuspended(
+@@ -11881,7 +11881,7 @@ function pingSuspendedRoot(root, wakeable, pingedLanes) {
+     (3 === workInProgressRootExitStatus &&
+       (workInProgressRootRenderLanes & 62914560) ===
+         workInProgressRootRenderLanes &&
+-      300 > now$1() - globalMostRecentFallbackTime)
++      0 > now$1() - globalMostRecentFallbackTime)
+       ? 0 === (executionContext & 2) && prepareFreshStack(root, 0)
+       : (workInProgressRootPingedLanes |= pingedLanes),
+     workInProgressSuspendedRetryLanes === workInProgressRootRenderLanes &&
