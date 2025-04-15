@@ -20,6 +20,7 @@ export class ChatsAdapter implements Chats {
 
     return new Chat(
       row.id,
+      row.userId,
       row.messages.map(
         (message) => new Message(message.id, message.content, message.role),
       ),
@@ -27,9 +28,14 @@ export class ChatsAdapter implements Chats {
   }
 
   async save(chat: Chat): Promise<void> {
-    await tx().chat.update({
-      where: { id: chat.id },
-      data: {
+    await tx().chat.upsert({
+      where: { id: chat.id, userId: chat.userId },
+      create: {
+        id: chat.id,
+        userId: chat.userId,
+        version: 1,
+      },
+      update: {
         version: { increment: 1 },
       },
     });

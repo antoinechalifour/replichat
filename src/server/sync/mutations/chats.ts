@@ -4,6 +4,7 @@ import { prisma, tx } from "~/server/prisma";
 import { generateText } from "ai";
 import { createOpenAI } from "@ai-sdk/openai";
 import { poke } from "~/server/pusher";
+import { createChat } from "~/server/chats/CreateChat";
 
 async function generateChatName(userId: string, chatId: string) {
   const chat = await prisma.chat.findFirstOrThrow({
@@ -36,35 +37,28 @@ async function generateChatName(userId: string, chatId: string) {
   poke(userId);
 }
 
-export const createChat = createMutationHandler("createChat")
+export const createChatMutation = createMutationHandler("createChat")
   .validate((args) =>
     z
       .object({
         id: z.string(),
+        // TODO: message object + content
         messageId: z.string(),
         message: z.string(),
       })
       .parse(args),
   )
   .handler(async ({ args, ctx }) => {
-    await tx().chat.create({
-      data: {
-        id: args.id,
-        userId: ctx.userId,
-        version: 1,
-        messages: {
-          create: {
-            id: args.messageId,
-            role: "USER",
-            content: args.message,
-          },
-        },
-      },
+    await createChat.execute({
+      id: args.id,
+      userId: ctx.userId,
+      message: { id: args.messageId, content: args.message },
     });
-    setTimeout(() => generateChatName(ctx.userId, args.id), 2000);
+    // TODO: post-commit
+    setTimeout(() => generateChatName(ctx.userId, args.id), 1000);
   });
 
-export const updateChat = createMutationHandler("updateChat")
+export const updateChatMutation = createMutationHandler("updateChat")
   .validate((args) =>
     z
       .object({
@@ -80,7 +74,7 @@ export const updateChat = createMutationHandler("updateChat")
     });
   });
 
-export const deleteChat = createMutationHandler("deleteChat")
+export const deleteChatMutation = createMutationHandler("deleteChat")
   .validate((args) =>
     z
       .object({
@@ -92,7 +86,7 @@ export const deleteChat = createMutationHandler("deleteChat")
     await tx().chat.delete({ where: { id: args.chatId, userId: ctx.userId } });
   });
 
-export const sendMessage = createMutationHandler("sendMessage")
+export const sendMessageMutation = createMutationHandler("sendMessage")
   .validate((args) =>
     z
       .object({

@@ -11,6 +11,7 @@ export class Message {
 export class Chat {
   constructor(
     public readonly id: string,
+    public readonly userId: string,
     public readonly messages: Message[],
   ) {}
 
