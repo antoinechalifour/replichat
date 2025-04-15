@@ -6,8 +6,8 @@
   "packageManager": "pnpm@10.8.1",
   "scripts": {
     "dev": "vinxi dev",
-    "build": "vinxi build && pnpm run prisma:generate",
-    "prisma:generate": "prisma generate",
+    "build": "vinxi build",
+    "postinstall": "prisma generate",
     "prisma:migrate": "prisma migrate deploy",
     "start": "vinxi start",
     "lint": "eslint src",
