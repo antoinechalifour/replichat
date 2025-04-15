@@ -31,9 +31,10 @@ async function generateChatName(userId: string, chatId: string) {
     ],
   });
 
-  await prisma.chat.update({
-    where: { id: chatId },
-    data: { title: response.text },
+  await updateChat.execute({
+    id: chatId,
+    userId,
+    updates: { title: response.text },
   });
 
   poke(userId);
