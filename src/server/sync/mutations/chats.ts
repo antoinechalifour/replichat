@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { createMutationHandler } from "../MutationHandler";
-import { prisma, tx } from "~/server/prisma";
+import { prisma, runTransaction, tx } from "~/server/prisma";
 import { generateText } from "ai";
 import { createOpenAI } from "@ai-sdk/openai";
 import { poke } from "~/server/pusher";
@@ -31,11 +31,13 @@ async function generateChatName(userId: string, chatId: string) {
     ],
   });
 
-  await updateChat.execute({
-    id: chatId,
-    userId,
-    updates: { title: response.text },
-  });
+  await runTransaction(() =>
+    updateChat.execute({
+      id: chatId,
+      userId,
+      updates: { title: response.text },
+    }),
+  );
 
   poke(userId);
 }
