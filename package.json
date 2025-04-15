@@ -3,6 +3,7 @@
   "private": true,
   "sideEffects": false,
   "type": "module",
+  "packageManager": "pnpm@10.8.1",
   "scripts": {
     "dev": "vinxi dev",
     "build": "vinxi build && pnpm run prisma:generate",
