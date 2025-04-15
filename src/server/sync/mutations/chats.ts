@@ -105,9 +105,10 @@ export const addUserMessageMutation = createMutationHandler("addUserMessage")
       })
       .parse(args),
   )
-  .handler(({ args }) =>
+  .handler(({ args, ctx }) =>
     addMessage.execute({
       chatId: args.chatId,
+      userId: ctx.userId,
       messageId: args.message.id,
       messageContent: args.message.content,
       role: "USER",

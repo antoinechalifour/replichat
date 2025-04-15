@@ -5,7 +5,7 @@ export class UpdateChat {
   constructor(private readonly chats: Chats) {}
 
   async execute(args: { id: string; userId: string; updates: ChatUpdates }) {
-    const chat = await this.chats.ofId(args.id);
+    const chat = await this.chats.ofId(args.id, args.userId);
     chat.applyUpdates(args.updates);
     await this.chats.save(chat);
   }

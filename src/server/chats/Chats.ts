@@ -2,14 +2,14 @@ import { tx } from "~/server/prisma";
 import { Chat, Message } from "./Chat";
 
 export interface Chats {
-  ofId(id: string): Promise<Chat>;
+  ofId(id: string, userId: string): Promise<Chat>;
   save(chat: Chat): Promise<void>;
 }
 
 export class ChatsAdapter implements Chats {
-  async ofId(id: string): Promise<Chat> {
+  async ofId(id: string, userId: string): Promise<Chat> {
     const row = await tx().chat.findUniqueOrThrow({
-      where: { id },
+      where: { id, userId },
       include: {
         messages: {
           orderBy: { createdAt: "asc" },

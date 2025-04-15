@@ -66,6 +66,7 @@ async function doCallOpenAI(args: {
       await runTransaction(() =>
         addMessage.execute({
           chatId: args.chatId,
+          userId: args.userId,
           messageId: crypto.randomUUID(),
           messageContent: message.text,
           role: "SYSTEM",
