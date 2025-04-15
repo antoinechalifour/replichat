@@ -9,9 +9,8 @@ export class CreateChat {
     userId: string;
     message: { id: string; content: string };
   }) {
-    const chat = new Chat(args.id, args.userId, [
-      new Message(args.message.id, args.message.content, "USER"),
-    ]);
+    const message = new Message(args.message.id, args.message.content, "USER");
+    const chat = new Chat(args.id, args.userId, "Untitled", [message]);
     await this.chats.save(chat);
   }
 }

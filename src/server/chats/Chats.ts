@@ -3,7 +3,6 @@ import { Chat, Message } from "./Chat";
 
 export interface Chats {
   ofId(id: string): Promise<Chat>;
-
   save(chat: Chat): Promise<void>;
 }
 
@@ -21,6 +20,7 @@ export class ChatsAdapter implements Chats {
     return new Chat(
       row.id,
       row.userId,
+      row.title,
       row.messages.map(
         (message) => new Message(message.id, message.content, message.role),
       ),
@@ -33,9 +33,11 @@ export class ChatsAdapter implements Chats {
       create: {
         id: chat.id,
         userId: chat.userId,
+        title: chat.title,
         version: 1,
       },
       update: {
+        title: chat.title,
         version: { increment: 1 },
       },
     });

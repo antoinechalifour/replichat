@@ -8,10 +8,15 @@ export class Message {
   ) {}
 }
 
+export type ChatUpdates = {
+  title: string;
+};
+
 export class Chat {
   constructor(
     public readonly id: string,
     public readonly userId: string,
+    public title: string,
     public readonly messages: Message[],
   ) {}
 
@@ -27,5 +32,9 @@ export class Chat {
     const lastMessage = this.messages.at(-1);
     if (!lastMessage) return false;
     return lastMessage.role === role;
+  }
+
+  applyUpdates(updates: ChatUpdates) {
+    this.title = updates.title;
   }
 }

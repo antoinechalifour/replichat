@@ -5,6 +5,7 @@ import { generateText } from "ai";
 import { createOpenAI } from "@ai-sdk/openai";
 import { poke } from "~/server/pusher";
 import { createChat } from "~/server/chats/CreateChat";
+import { updateChat } from "~/server/chats/UpdateChat";
 
 async function generateChatName(userId: string, chatId: string) {
   const chat = await prisma.chat.findFirstOrThrow({
@@ -62,17 +63,21 @@ export const updateChatMutation = createMutationHandler("updateChat")
   .validate((args) =>
     z
       .object({
+        // TODO: mutation schema
         chatId: z.string(),
         title: z.string(),
       })
       .parse(args),
   )
-  .handler(async ({ args, ctx }) => {
-    await tx().chat.update({
-      where: { id: args.chatId, userId: ctx.userId },
-      data: { title: args.title },
-    });
-  });
+  .handler(({ args, ctx }) =>
+    updateChat.execute({
+      id: args.chatId,
+      userId: ctx.userId,
+      updates: {
+        title: args.title,
+      },
+    }),
+  );
 
 export const deleteChatMutation = createMutationHandler("deleteChat")
   .validate((args) =>
@@ -86,6 +91,7 @@ export const deleteChatMutation = createMutationHandler("deleteChat")
     await tx().chat.delete({ where: { id: args.chatId, userId: ctx.userId } });
   });
 
+// TODO: addMessage
 export const sendMessageMutation = createMutationHandler("sendMessage")
   .validate((args) =>
     z
