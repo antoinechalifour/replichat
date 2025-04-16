@@ -23,7 +23,7 @@ export function ChatPromptComposer({
   };
 
   return (
-    <div className="max-w-2xl mx-auto w-full pb-3">
+    <div className="max-w-2xl mx-auto w-full pb-3 max-sm:px-3">
       <PromptComposer onSubmit={onSubmit} disabled={disabled} />
     </div>
   );

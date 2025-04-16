@@ -4,10 +4,13 @@ import { Icon } from "~/components/Icon";
 import { ChevronDownIcon } from "lucide-react";
 import { useReplicache } from "~/components/Replicache";
 import { UserViewModel } from "~/shared/UserViewModel";
+import { useIsWide } from "~/client/hooks/useIsWide";
+import clsx from "clsx";
 
 export function ModelSelect({ user }: { user: UserViewModel }) {
   const r = useReplicache();
   const models = useModels();
+  const isWide = useIsWide();
   const model = models.find((model) => model.id === user.currentModelId);
   if (model == null) return null;
 
@@ -22,7 +25,7 @@ export function ModelSelect({ user }: { user: UserViewModel }) {
 
       <DropdownMenu.Portal>
         <DropdownMenu.Content
-          align="start"
+          align={isWide ? "start" : "center"}
           className="border border-gray-200 shadow-lg pt-3 pb-2 px-6 min-w-80 bg-white rounded-2xl"
         >
           <header className="text-sm text-gray-400 mb-1">Models</header>

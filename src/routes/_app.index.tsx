@@ -29,7 +29,7 @@ function Home() {
       <h1 className="text-balance font-medium text-3xl mb-6">
         What can I help with?
       </h1>
-      <div className="max-w-2xl w-full">
+      <div className="max-w-2xl w-full max-sm:px-3">
         <PromptComposer onSubmit={onSubmit} autofocus />
       </div>
     </div>
