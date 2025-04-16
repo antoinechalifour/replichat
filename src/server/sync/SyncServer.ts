@@ -1,5 +1,4 @@
 import { PullResponse } from "replicache";
-import { poke } from "../pusher";
 import { PushHandler, PushRequest } from "./PushHandler";
 import { PullHandler, PullRequest } from "./PullHandler";
 import { ClientGroupsAdapter } from "./ClientGroups";
@@ -26,7 +25,6 @@ export class SyncServer implements ReplicacheSync {
 
   async push(userId: string, push: PushRequest): Promise<void> {
     await this.pushHandler.handle(userId, push);
-    poke(userId);
   }
 }
 

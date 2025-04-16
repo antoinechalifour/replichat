@@ -3,6 +3,7 @@ import TypedEmitter from "typed-emitter";
 import { generateChatName } from "~/server/chats/GenerateChatName";
 import { MessageRole } from "./chats/Chat";
 import { generateSystemMessage } from "~/server/chats/GenerateSystemMessage";
+import { poke } from "~/server/pusher";
 
 type Events = {
   "chat.created": (args: { chatId: string; userId: string }) => void;
@@ -26,4 +27,8 @@ emitter.on("chat.message.created", (args) => {
     chatId: args.chatId,
     userId: args.userId,
   });
+});
+
+emitter.on("chat.message.created", (args) => {
+  poke(args.userId);
 });

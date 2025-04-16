@@ -1,7 +1,6 @@
 import { streamText } from "ai";
 import { prisma, runTransaction } from "~/server/prisma";
 import { addMessage } from "~/server/chats/AddMessage";
-import { poke } from "~/server/pusher";
 import { createOpenAI } from "@ai-sdk/openai";
 import { raise } from "~/utils/errors";
 import { messageStreams } from "~/server/chats/MessageStreams";
@@ -43,7 +42,6 @@ class GenerateSystemMessage {
             role: "SYSTEM",
           }),
         );
-        poke(userId);
         // TODO: expire stream
       },
     });
