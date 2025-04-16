@@ -6,13 +6,14 @@ import {
 } from "~/server/redis";
 import { asyncIterableToReadableStream } from "~/server/stream";
 
-interface MessageStreams {
+export interface MessageStreams {
   ofMessage(chatId: string, messageId: string): Promise<ReadableStream<string>>;
   save(args: {
     chatId: string;
     messageId: string;
     stream: ReadableStream<string>;
   }): Promise<void>;
+  delete(chatId: string, messageId: string): Promise<void>;
 }
 
 const ChunkSchema = z
@@ -63,6 +64,11 @@ export class MessageStreamsAdapter implements MessageStreams {
       streamName: key,
     });
     await redis.xadd(key, "*", "type", "end");
+  }
+
+  async delete(chatId: string, messageId: string): Promise<void> {
+    const redis = createRedis();
+    await redis.del(MessageStreamsAdapter.streamKey(chatId, messageId));
   }
 }
 

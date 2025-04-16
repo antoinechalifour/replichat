@@ -3,14 +3,18 @@ import { prisma, runTransaction } from "~/server/prisma";
 import { addMessage } from "~/server/chats/AddMessage";
 import { createOpenAI } from "@ai-sdk/openai";
 import { raise } from "~/utils/errors";
-import { messageStreams } from "~/server/chats/MessageStreams";
+import { MessageStreams, MessageStreamsAdapter } from "./MessageStreams";
 
 class GenerateSystemMessage {
+  constructor(private readonly messageStreams: MessageStreams) {}
+
   async execute({ chatId, userId }: { userId: string; chatId: string }) {
     const [chat, { openai, model }] = await Promise.all([
       this.getChat(chatId),
       this.getAI(userId),
     ]);
+
+    const messageId = chat.messages[chat.messages.length - 1].id;
 
     const result = streamText({
       model: openai(model),
@@ -42,13 +46,12 @@ class GenerateSystemMessage {
             role: "SYSTEM",
           }),
         );
-        // TODO: expire stream
+        await this.messageStreams.delete(chatId, messageId);
       },
     });
-
-    await messageStreams.save({
+    await this.messageStreams.save({
       chatId,
-      messageId: chat.messages[chat.messages.length - 1].id,
+      messageId: messageId,
       stream: result.textStream,
     });
   }
@@ -86,4 +89,6 @@ class GenerateSystemMessage {
   }
 }
 
-export const generateSystemMessage = new GenerateSystemMessage();
+export const generateSystemMessage = new GenerateSystemMessage(
+  new MessageStreamsAdapter(),
+);
