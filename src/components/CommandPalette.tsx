@@ -16,7 +16,6 @@ import {
 import { useNavigate } from "@tanstack/react-router";
 import { MessageCircleIcon, XIcon } from "lucide-react";
 import { Command } from "cmdk";
-import { Dialog } from "radix-ui";
 import { IconButton } from "~/components/IconButton";
 import { Icon } from "~/components/Icon";
 import Fuse from "fuse.js";
@@ -222,9 +221,12 @@ export const CommandPalette = () => {
           onValueChange={setSearch}
         />
 
-        <Dialog.Close asChild>
-          <IconButton title="Close" variant="rounded" icon={XIcon} />
-        </Dialog.Close>
+        <IconButton
+          title="Close"
+          variant="rounded"
+          icon={XIcon}
+          onClick={() => setOpen(false)}
+        />
       </header>
       <Command.List className={clsx("h-72 overflow-y-auto p-2")}>
         <Command.Empty className="py-6 text-center text-sm">
