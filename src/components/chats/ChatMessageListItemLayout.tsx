@@ -9,9 +9,8 @@ export function ChatMessageListItemLayout({
   return (
     <article
       id={id}
-      className={clsx("px-5 py-2.5", {
+      className={clsx("px-5 py-2.5 prose", {
         "max-w-lg self-end bg-gray-100 rounded-3xl": role === "USER",
-        prose: role === "SYSTEM",
       })}
     >
       {children}
