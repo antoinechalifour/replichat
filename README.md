@@ -1,5 +1,7 @@
 # Replichat
 
+<video src="./demo/demo.mp4" width="480" />
+
 Replichat is an open source LLM chat application (a ChatGPT clone with plans to support more providers later) built with a local-first approach for blazing-fast, instant UIs without loading states.
 
 > **Live Demo:** [replichat.antoinechalifour.dev](https://replichat.antoinechalifour.dev/)
