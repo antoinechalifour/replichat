@@ -1,72 +1,110 @@
-# Welcome to TanStack.com!
+Below is an example README.md for your project:
 
-This site is built with TanStack Router!
+---
 
-- [TanStack Router Docs](https://tanstack.com/router)
+# Replichat
 
-It's deployed automagically with Netlify!
+Replichat is an open source LLM chat application (a ChatGPT clone with plans to support more providers later) built with a local-first approach for blazing-fast, instant UIs without loading states.
 
-- [Netlify](https://netlify.com/)
+> **Live Demo:** [replichat.antoinechalifour.dev](https://replichat.antoinechalifour.dev/)
 
-## Development
+## Table of Contents
 
-From your terminal:
+- [Replichat](#replichat)
+    - [Overview](#overview)
+    - [Key Features](#key-features)
+    - [Tech Stack](#tech-stack)
+    - [Demo](#demo)
+    - [Installation](#installation)
+    - [Usage](#usage)
+    - [Contributing](#contributing)
+    - [License](#license)
+    - [Acknowledgments](#acknowledgments)
 
-```sh
-pnpm install
-pnpm dev
-```
+## Overview
 
-This starts your app in development mode, rebuilding assets on file changes.
+Replichat leverages a modern local-first approach to deliver an ultra-fast and responsive chat experience. By keeping UI interactions local and synchronizing changes in the background, the app eliminates annoying spinners and loading states while still ensuring data consistency across multiple tabs.
 
-## Editing and previewing the docs of TanStack projects locally
+## Key Features
 
-The documentations for all TanStack projects except for `React Charts` are hosted on [https://tanstack.com](https://tanstack.com), powered by this TanStack Router app.
-In production, the markdown doc pages are fetched from the GitHub repos of the projects, but in development they are read from the local file system.
+- **Instant UI:** Fast, local-first user interface that ensures immediate responsiveness.
+- **Resilient Streaming:** Robust content streaming across multiple tabs with resilient synchronization powered by Replicache.
+- **Multiple Providers:** Currently supports OpenAI, with plans to integrate more providers in the future.
+- **Modern Architecture:** Leverages state-of-the-art tools and frameworks to ensure reliability and scalability.
 
-Follow these steps if you want to edit the doc pages of a project (in these steps we'll assume it's [`TanStack/form`](https://github.com/tanstack/form)) and preview them locally :
+## Tech Stack
 
-1. Create a new directory called `tanstack`.
+- **Tanstack Start:** Used for the web framework, authentication, and server functions.
+- **Replicache:** Implements the local-first sync engine.
+- **Redis Streams:** Provides resilient streaming to keep multiple tabs synchronized.
+- **Postgres:** Serves as the primary database for structured data.
+- **OpenAI (via ai SDK):** Used to power the chat responses.
+- **Coolify:** Deployed with Coolify for a simple and robust hosting solution.
 
-```sh
-mkdir tanstack
-```
+## Demo
 
-2. Enter the directory and clone this repo and the repo of the project there.
+Check out the live demo: [replichat.antoinechalifour.dev](https://replichat.antoinechalifour.dev/)
 
-```sh
-cd tanstack
-git clone git@github.com:TanStack/tanstack.com.git
-git clone git@github.com:TanStack/form.git
-```
+You can also watch a video demo of the project on Twitter (note that GitHub does not support embedding tweets directly):
 
-> [!NOTE]
-> Your `tanstack` directory should look like this:
->
-> ```
-> tanstack/
->    |
->    +-- form/
->    |
->    +-- tanstack.com/
-> ```
+View the demo on Twitter: [Tweet by Antoine_Chlfr](https://x.com/Antoine_Chlfr/status/1912469920421388680)
 
-> [!WARNING]
-> Make sure the name of the directory in your local file system matches the name of the project's repo. For example, `tanstack/form` must be cloned into `form` (this is the default) instead of `some-other-name`, because that way, the doc pages won't be found.
+## Installation
 
-3. Enter the `tanstack/tanstack.com` directory, install the dependencies and run the app in dev mode:
+To run Replichat locally, follow these steps:
 
-```sh
-cd tanstack.com
-pnpm i
-# The app will run on https://localhost:3000 by default
-pnpm dev
-```
+1. **Clone the repository:**
+   ```bash
+   git clone https://github.com/antoinechalifour/replichat
+   cd replichat
+   ```
 
-4. Now you can visit http://localhost:3000/form/latest/docs/overview in the browser and see the changes you make in `tanstack/form/docs`.
+2. **Install dependencies:**
+   ```bash
+   pnpm install
+   ```
 
-> [!NOTE]
-> The updated pages need to be manually reloaded in the browser.
+3. **Create and configure your environment variables:**
 
-> [!WARNING]
-> You will need to update the `docs/config.json` file (in the project's repo) if you add a new doc page!
+   Create a `.env` file in the root directory and add the necessary configurations (e.g., database URL, OpenAI API keys, etc.). See the provided `.env.example` for guidance.
+
+4. **Run the development server:**
+   ```bash
+   pnpm dev
+   ```
+
+5. **Open in your browser:**
+
+   Navigate to `http://localhost:3000` (or the configured port) to see Replichat in action.
+
+## Usage
+
+Replichat is designed to be user-friendly. Once running, simply interact with the chat interface, and reap the benefits of its local-first, lightning-fast experience. All UI operations are handled instantly, while the synchronization happens in the background.
+
+## Contributing
+
+Contributions are very welcome! If you'd like to contribute:
+
+1. Fork the repository.
+2. Create a new branch for your feature or bugfix.
+3. Commit your changes.
+4. Open a pull request with a description of your changes.
+
+Please make sure to follow the project's coding conventions and include tests where appropriate.
+
+## License
+
+Distributed under the MIT License. See the [LICENSE](LICENSE) file for more details.
+
+## Acknowledgments
+
+- Thanks to the developers of [Tanstack Start](https://tanstack.com/start), [Replicache](https://replicache.dev/), and other open source projects that made Replichat possible.
+- Hat tip to the community for continuous inspiration and support.
+
+---
+
+Happy chatting! 🫶
+
+---
+
+Feel free to customize this README further to suit your project's needs. Enjoy developing Replichat!
