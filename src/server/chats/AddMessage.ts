@@ -1,5 +1,7 @@
 import { MessageRole } from "./Chat";
 import { Chats, ChatsAdapter } from "./Chats";
+import { postCommit } from "~/server/prisma";
+import { emitter } from "~/server/emitter";
 
 export class AddMessage {
   constructor(private readonly chats: Chats) {}
@@ -20,6 +22,15 @@ export class AddMessage {
     const chat = await this.chats.ofId(chatId, userId);
     chat.addMessage({ id: messageId, message: messageContent, role });
     await this.chats.save(chat);
+
+    postCommit(() => {
+      emitter.emit("chat.message.created", {
+        chatId: chat.id,
+        userId: chat.userId,
+        messageId: messageId,
+        role: role,
+      });
+    });
   }
 }
 

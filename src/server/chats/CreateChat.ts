@@ -20,6 +20,12 @@ export class CreateChat {
         chatId: chat.id,
         userId: chat.userId,
       });
+      emitter.emit("chat.message.created", {
+        chatId: chat.id,
+        userId: chat.userId,
+        messageId: message.id,
+        role: message.role,
+      });
     });
   }
 }
