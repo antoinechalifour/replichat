@@ -1,13 +1,10 @@
-import {
-  chatMessageStreamName,
-  createStreamCache,
-} from "~/server/chats/StreamResponse";
 import { streamText } from "ai";
 import { prisma, runTransaction } from "~/server/prisma";
 import { addMessage } from "~/server/chats/AddMessage";
 import { poke } from "~/server/pusher";
 import { createOpenAI } from "@ai-sdk/openai";
 import { raise } from "~/utils/errors";
+import { messageStreams } from "~/server/chats/MessageStreams";
 
 class GenerateSystemMessage {
   async execute({ chatId, userId }: { userId: string; chatId: string }) {
@@ -15,13 +12,6 @@ class GenerateSystemMessage {
       this.getChat(chatId),
       this.getAI(userId),
     ]);
-    const cache = createStreamCache(
-      chatMessageStreamName({
-        chatId,
-        messageId: chat.messages[chat.messages.length - 1].id,
-      }),
-    );
-    await cache.create();
 
     const result = streamText({
       model: openai(model),
@@ -58,7 +48,11 @@ class GenerateSystemMessage {
       },
     });
 
-    await cache.write(result.textStream);
+    await messageStreams.save({
+      chatId,
+      messageId: chat.messages[chat.messages.length - 1].id,
+      stream: result.textStream,
+    });
   }
 
   private getChat(chatId: string) {

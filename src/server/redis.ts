@@ -7,12 +7,12 @@ export function createRedis() {
 export const redis = createRedis();
 
 export async function* consumeRedisStream<TChunk, TYield>({
-  streamName,
+  key,
   parseChunk,
   getYieldedChunk,
   isComplete,
 }: {
-  streamName: string;
+  key: string;
   parseChunk(chunk: unknown): TChunk;
   getYieldedChunk(chunk: TChunk): TYield | null;
   isComplete(chunk: TChunk): boolean;
@@ -21,7 +21,7 @@ export async function* consumeRedisStream<TChunk, TYield>({
   const redis = createRedis();
 
   while (true) {
-    const result = await redis.xread("BLOCK", 0, "STREAMS", streamName, lastId);
+    const result = await redis.xread("BLOCK", 0, "STREAMS", key, lastId);
     if (result) {
       for (const [, messages] of result) {
         for (const [id, fields] of messages) {

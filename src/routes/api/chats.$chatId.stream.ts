@@ -1,36 +1,9 @@
 import { createAPIFileRoute } from "@tanstack/react-start/api";
 import { prisma } from "~/server/prisma";
 import { authenticate } from "~/server/auth";
-import { consumeRedisStream } from "~/server/redis";
-import { z } from "zod";
-import {
-  asyncIterableToReadableStream,
-  streamTextResponse,
-} from "~/server/stream";
-import {
-  chatMessageStreamName,
-  createStreamCache,
-} from "~/server/chats/StreamResponse";
+import { streamTextResponse } from "~/server/stream";
 
-const ChunkSchema = z
-  .object({ type: z.literal("init") })
-  .or(z.object({ type: z.literal("end") }))
-  .or(z.object({ type: z.literal("delta"), delta: z.string() }));
-
-function streamFromCache(streamName: string) {
-  console.log("[Redis] Streaming...");
-  return asyncIterableToReadableStream(
-    consumeRedisStream({
-      streamName,
-      parseChunk: (chunk) => ChunkSchema.parse(chunk),
-      getYieldedChunk: (chunk) => {
-        if (chunk.type === "delta") return chunk.delta;
-        return null;
-      },
-      isComplete: (chunk) => chunk.type === "end",
-    }),
-  );
-}
+import { messageStreams } from "~/server/chats/MessageStreams";
 
 export const APIRoute = createAPIFileRoute("/api/chats/$chatId/stream")({
   POST: async ({ request, params }) => {
@@ -41,17 +14,14 @@ export const APIRoute = createAPIFileRoute("/api/chats/$chatId/stream")({
         messages: { orderBy: { createdAt: "desc" }, take: 1 },
       },
     });
-    const streamName = chatMessageStreamName({
-      chatId: chat.id,
-      messageId: chat.messages[0].id,
-    });
 
-    const streamCache = createStreamCache(streamName);
-    const exists = await streamCache.check();
-
-    if (exists) {
-      return streamTextResponse(streamFromCache(streamName));
-    } else {
+    try {
+      const stream = await messageStreams.ofMessage(
+        chat.id,
+        chat.messages[0].id,
+      );
+      return streamTextResponse(stream);
+    } catch {
       return new Response(null, { status: 404 });
     }
   },
