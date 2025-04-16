@@ -21,7 +21,7 @@ export function DrawerMenu() {
 
       <Drawer.Portal>
         <Drawer.Overlay className="fixed inset-0" />
-        <Drawer.Content className="left-0 top-0 bottom-0 fixed z-10 outline-none w-[260px] flex">
+        <Drawer.Content className="left-0 top-0 bottom-0 fixed outline-none w-[260px] flex">
           <div className="bg-white border-r border-gray-200 shadow-2xl h-full w-full grow flex flex-col">
             <NavbarContent />
           </div>

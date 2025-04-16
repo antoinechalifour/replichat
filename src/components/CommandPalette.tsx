@@ -211,7 +211,7 @@ export const CommandPalette = () => {
       onOpenChange={setOpen}
       shouldFilter={false}
       label="Command palette"
-      className="fixed top-1/2 left-1/2 -translate-y-1/2 -translate-x-1/2 w-full max-w-2xl bg-white border border-gray-200 shadow-2xl rounded-2xl"
+      className="fixed flex flex-col max-sm:inset-0 sm:top-1/2 sm:left-1/2 sm:-translate-y-1/2 sm:-translate-x-1/2 w-full sm:max-w-2xl bg-white border border-gray-200 shadow-2xl sm:rounded-2xl"
     >
       <header className="p-4 pr-3 gap-3 flex items-center border-b border-gray-200">
         <Command.Input
@@ -228,7 +228,7 @@ export const CommandPalette = () => {
           onClick={() => setOpen(false)}
         />
       </header>
-      <Command.List className={clsx("h-72 overflow-y-auto p-2")}>
+      <Command.List className={clsx("grow sm:h-72 overflow-y-auto p-2")}>
         <Command.Empty className="py-6 text-center text-sm">
           No results found.
         </Command.Empty>
