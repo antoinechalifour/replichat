@@ -1,6 +1,9 @@
 # Replichat
 
-<video src="./demo/demo.mp4" width="480" />
+<video width="640" height="360" controls>
+  <source src="demo/demo.mp4" type="video/mp4">
+  Your browser does not support the video tag.
+</video>
 
 Replichat is an open source LLM chat application (a ChatGPT clone with plans to support more providers later) built with a local-first approach for blazing-fast, instant UIs without loading states.
 
