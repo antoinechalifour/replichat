@@ -7,10 +7,12 @@ export function IconButton({
   title,
   icon: IconComponent,
   variant = "squared",
+  size = "default",
   ...props
 }: {
   title: string;
   variant?: "squared" | "rounded";
+  size?: "small" | "default";
   icon: ComponentType<LucideProps>;
 } & ComponentProps<"button">) {
   return (
@@ -25,7 +27,7 @@ export function IconButton({
         },
       )}
     >
-      <Icon as={IconComponent} />
+      <Icon as={IconComponent} size={size} />
     </button>
   );
 }

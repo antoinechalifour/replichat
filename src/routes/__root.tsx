@@ -19,6 +19,7 @@ import { ReplicacheProvider } from "~/components/Replicache";
 import { authenticateOrNull } from "~/server/auth";
 import { Tooltip } from "radix-ui";
 import { LandingPage } from "~/components/landing/LandingPage";
+import { Toaster } from "sonner";
 
 const fetchAuth = createServerFn({ method: "GET" }).handler(() =>
   authenticateOrNull(getWebRequest()!),
@@ -100,6 +101,7 @@ function RootComponent() {
           <ReplicacheProvider userId={user.id}>
             <Outlet />
           </ReplicacheProvider>
+          <Toaster />
         </ClientOnly>
       )}
     </RootDocument>
