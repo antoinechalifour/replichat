@@ -129,9 +129,11 @@ export class PullHandler {
     if (prevCVR === undefined) patch.push({ op: "clear" });
 
     for (const [name, { puts, dels }] of Object.entries(entities)) {
+      // @ts-expect-error Trust me bro
       for (const id of dels) {
         patch.push({ op: "del", key: `${name}/${id}` });
       }
+      // @ts-expect-error Trust me bro
       for (const entity of puts) {
         patch.push({
           op: "put",
