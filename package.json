@@ -41,6 +41,7 @@
     "replicache": "15.2.1",
     "tailwind-merge": "2.6.0",
     "typed-emitter": "^2.1.0",
+    "vaul": "^1.1.2",
     "vinxi": "0.5.3",
     "zod": "3.24.2"
   },
