@@ -32,7 +32,7 @@ function streamFromCache(streamName: string) {
   );
 }
 
-export const APIRoute = createAPIFileRoute("/api/chats/$chatId/generate")({
+export const APIRoute = createAPIFileRoute("/api/chats/$chatId/stream")({
   POST: async ({ request, params }) => {
     await authenticate(request);
     const chat = await prisma.chat.findFirstOrThrow({

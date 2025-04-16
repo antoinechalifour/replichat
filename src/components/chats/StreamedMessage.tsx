@@ -5,7 +5,7 @@ import { LoaderIcon } from "lucide-react";
 import { Icon } from "~/components/Icon";
 
 async function* generate(chatId: string) {
-  const response = await fetch(`/api/chats/${chatId}/generate`, {
+  const response = await fetch(`/api/chats/${chatId}/stream`, {
     method: "POST",
   });
 
