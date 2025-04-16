@@ -1,7 +1,3 @@
-Below is an example README.md for your project:
-
----
-
 # Replichat
 
 Replichat is an open source LLM chat application (a ChatGPT clone with plans to support more providers later) built with a local-first approach for blazing-fast, instant UIs without loading states.
