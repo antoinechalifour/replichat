@@ -14,8 +14,8 @@ importers:
   .:
     dependencies:
       '@ai-sdk/openai':
-        specifier: 1.3.13
-        version: 1.3.13(zod@3.24.2)
+        specifier: 1.3.16
+        version: 1.3.16(zod@3.24.2)
       '@clerk/tanstack-react-start':
         specifier: 0.13.4
         version: 0.13.4(@tanstack/react-router@1.116.0(react-dom@19.0.0(patch_hash=0605354fe9b230d707fbc869752b8442b3a858c0c0ad9206269e25f2c25c1127)(react@19.0.0))(react@19.0.0))(@tanstack/react-start@1.116.0(@tanstack/react-router@1.116.0(react-dom@19.0.0(patch_hash=0605354fe9b230d707fbc869752b8442b3a858c0c0ad9206269e25f2c25c1127)(react@19.0.0))(react@19.0.0))(@types/node@22.5.4)(db0@0.3.1)(ioredis@5.6.1)(jiti@2.4.2)(react-dom@19.0.0(patch_hash=0605354fe9b230d707fbc869752b8442b3a858c0c0ad9206269e25f2c25c1127)(react@19.0.0))(react@19.0.0)(terser@5.39.0)(tsx@4.19.3)(vite@6.2.6(@types/node@22.5.4)(jiti@2.4.2)(terser@5.39.0)(tsx@4.19.3)(yaml@2.7.1))(yaml@2.7.1))(react-dom@19.0.0(patch_hash=0605354fe9b230d707fbc869752b8442b3a858c0c0ad9206269e25f2c25c1127)(react@19.0.0))(react@19.0.0)
@@ -164,8 +164,8 @@ importers:
 
 packages:
 
-  '@ai-sdk/openai@1.3.13':
-    resolution: {integrity: sha512-t7l11mXI+VcmeAALX2iisURFOBxm2tCqBi6biciDaQZSdF1Az2Z4oOPowuRVmH+VZugXT0GRr4YSyo2mT/HAZA==}
+  '@ai-sdk/openai@1.3.16':
+    resolution: {integrity: sha512-pjtiBKt1GgaSKZryTbM3tqgoegJwgAUlp1+X5uN6T+VPnI4FLSymV65tyloWzDlyqZmi9HXnnSRPu76VoL5D5g==}
     engines: {node: '>=18'}
     peerDependencies:
       zod: ^3.0.0
@@ -5278,7 +5278,7 @@ packages:
 
 snapshots:
 
-  '@ai-sdk/openai@1.3.13(zod@3.24.2)':
+  '@ai-sdk/openai@1.3.16(zod@3.24.2)':
     dependencies:
       '@ai-sdk/provider': 1.1.3
       '@ai-sdk/provider-utils': 2.2.7(zod@3.24.2)

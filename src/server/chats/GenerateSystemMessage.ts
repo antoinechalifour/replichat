@@ -68,7 +68,10 @@ class GenerateSystemMessage {
   private async getAI(userId: string) {
     const settings = await this.getAISettings(userId);
     return {
-      openai: createOpenAI({ apiKey: settings.apiKey }),
+      openai: createOpenAI({
+        apiKey: settings.apiKey,
+        compatibility: "strict",
+      }),
       model: settings.model,
     };
   }
