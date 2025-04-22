@@ -22,13 +22,14 @@ const ChunkSchema = z
   .or(z.object({ type: z.literal("delta"), delta: z.string() }));
 
 export class MessageStreamsAdapter implements MessageStreams {
+  private readonly redis = createRedis();
+
   async ofMessage(
     chatId: string,
     messageId: string,
   ): Promise<ReadableStream<string>> {
-    const redis = createRedis();
     const key = MessageStreamsAdapter.streamKey(chatId, messageId);
-    const result = await redis.exists(key);
+    const result = await this.redis.exists(key);
     const exists = result !== 0;
     if (!exists) throw new Error("Stream not found");
 
@@ -54,21 +55,19 @@ export class MessageStreamsAdapter implements MessageStreams {
     messageId: string;
     stream: ReadableStream<string>;
   }): Promise<void> {
-    const redis = createRedis();
     const key = MessageStreamsAdapter.streamKey(args.chatId, args.messageId);
 
-    await redis.xadd(key, "*", "type", "init");
+    await this.redis.xadd(key, "*", "type", "init");
     await writeReadableStreamToRedisStream({
-      redis,
+      redis: this.redis,
       readableStream: args.stream,
       streamName: key,
     });
-    await redis.xadd(key, "*", "type", "end");
+    await this.redis.xadd(key, "*", "type", "end");
   }
 
   async delete(chatId: string, messageId: string): Promise<void> {
-    const redis = createRedis();
-    await redis.del(MessageStreamsAdapter.streamKey(chatId, messageId));
+    await this.redis.del(MessageStreamsAdapter.streamKey(chatId, messageId));
   }
 }
 
