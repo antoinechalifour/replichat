@@ -20,25 +20,31 @@ export async function* consumeRedisStream<TChunk, TYield>({
   let lastId = "0";
   const redis = createRedis();
 
-  while (true) {
-    const result = await redis.xread("BLOCK", 0, "STREAMS", key, lastId);
-    if (result) {
-      for (const [, messages] of result) {
-        for (const [id, fields] of messages) {
-          // Convert the flat array of fields to an object.
-          const chunk: Record<string, string> = {};
-          for (let i = 0; i < fields.length; i += 2) {
-            chunk[fields[i]] = fields[i + 1];
-          }
+  try {
+    while (true) {
+      const result = await redis.xread("BLOCK", 0, "STREAMS", key, lastId);
+      if (result) {
+        for (const [, messages] of result) {
+          for (const [id, fields] of messages) {
+            // Convert the flat array of fields to an object.
+            const chunk: Record<string, string> = {};
+            for (let i = 0; i < fields.length; i += 2) {
+              chunk[fields[i]] = fields[i + 1];
+            }
 
-          lastId = id;
-          const parsed = parseChunk(chunk);
-          const yielded = getYieldedChunk(parsed);
-          if (yielded != null) yield yielded;
-          if (isComplete(parsed)) return;
+            lastId = id;
+            const parsed = parseChunk(chunk);
+            const yielded = getYieldedChunk(parsed);
+            if (yielded != null) yield yielded;
+            if (isComplete(parsed)) {
+              return;
+            }
+          }
         }
       }
     }
+  } finally {
+    await redis.quit();
   }
 }
 
