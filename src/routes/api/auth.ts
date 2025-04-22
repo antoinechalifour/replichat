@@ -8,7 +8,7 @@ export const APIRoute = createAPIFileRoute("/api/auth")({
       const { userId } = await getAuth(request);
       if (!userId) throw new Response("Unauthorized", { status: 401 });
       const defaultModel = await prisma.model.findUniqueOrThrow({
-        where: { code: "gpt-4o" },
+        where: { code: "gpt-4o-search-preview" },
       });
       await prisma.user.upsert({
         where: { externalId: userId },
